@@ -45,13 +45,16 @@ def calculate_client_features(df, reference_df, periods):
         
         # Join the period aggregations back to the final results DataFrame
         for metric in ["trans_loan_n_mortgage_cnt", "trans_loan_n_mortgage_amt"]:
-            final_results = final_results.join(period_aggregations, "unq_id_in_src_sys", "left")
+            avg_metric = f"avg_{metric}_{months}m"
+            final_results = final_results.join(period_aggregations.select("unq_id_in_src_sys", col("avg_trans_loan_n_mortgage_cnt").alias(avg_metric)),
+                                               "unq_id_in_src_sys",
+                                               "left")
             
-            # Calculate difference and percentage difference
+            # Calculate the difference and percentage difference
             final_results = final_results.withColumn(f"{metric}_diff_from_m{months}", 
-                                                     col(metric) - col(f"avg_{metric}"))
+                                                     col(metric) - col(avg_metric))
             final_results = final_results.withColumn(f"{metric}_sum_pct_diff_from_m{months}",
-                                                     (col(metric) - col(f"avg_{metric}")) / when(col(f"avg_{metric}") != 0, col(f"avg_{metric}")).otherwise(1))
+                                                     (col(metric) - col(avg_metric)) / when(col(avg_metric) != 0, col(avg_metric)).otherwise(1))
 
     return final_results
 
@@ -60,6 +63,7 @@ features_df = calculate_client_features(df, client_aggregations, [2, 3, 6, 12])
 
 # Show the result
 features_df.show()
+
 
 
 
