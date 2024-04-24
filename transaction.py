@@ -1,7 +1,6 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, sum, expr, last_day, to_date, format_string, date_format, lit
+from pyspark.sql.functions import col, sum, to_date, date_format, expr, when, avg
 from pyspark.sql.window import Window
-import pyspark.sql.functions as F
 
 # Start Spark session
 spark = SparkSession.builder.appName("Client Transaction Features Calculation").getOrCreate()
@@ -12,51 +11,55 @@ df = spark.table("dm_wm.pwm_transactions")
 # Convert ods_business_dt to date format
 df = df.withColumn("date", to_date(col("ods_business_dt"), "yyyy-MM-dd"))
 
-# Filter data up to a specific reference date (e.g., "2024-01-01")
+# Define the reference date
 reference_date = to_date(lit("2024-01-01"), "yyyy-MM-dd")
+
+# Filter data up to and including the reference date
 df = df.filter(col("date") <= reference_date)
 
-# Define the maximum look-back period based on the longest period needed for feature calculation
-max_look_back_months = 12  # As 'm12' is the longest period we are calculating
-look_back_date = reference_date - expr(f"INTERVAL {max_look_back_months} MONTHS")
+# Include transactions from up to 12 months before the reference date
+max_look_back_months = 12
+look_back_date = expr("add_months(to_date('2024-01-01'), -12)")
 df = df.filter(col("date") > look_back_date)
 
-# Group by client ID and calculate sums for relevant fields up to the reference date
+# Group by client ID and aggregate sums for relevant fields
 client_aggregations = df.groupBy("unq_id_in_src_sys").agg(
     sum(col("transfer_outgoing_cnt") + col("mortgage_outgoing_cnt")).alias("trans_loan_n_mortgage_cnt"),
     sum(col("transfer_outgoing_amt") + col("mortgage_outgoing_amt")).alias("trans_loan_n_mortgage_amt")
-)
+).cache()  # Cache for performance improvement if subsequent operations are extensive
 
 # Calculate features as differences from the reference month values
-def calculate_client_features(df, metric):
-    # Compute differences and percentage differences
-    for months in [2, 3, 6, 12]:
-        # Define the end of the period to compute the averages
-        period_end_date = reference_date - expr(f"INTERVAL {months} MONTHS")
-        period_start_date = period_end_date - expr(f"INTERVAL {months} MONTHS")
+def calculate_client_features(df, reference_df, metric, periods):
+    results = reference_df.select("unq_id_in_src_sys", metric)
 
-        # Filter data to the specific period
-        period_data = df.filter((col("date") > period_start_date) & (col("date") <= period_end_date))
+    for months in periods:
+        # Filter for the specific period
+        period_start_date = expr(f"add_months('{reference_date}', -{months})")
+        period_end_date = reference_date
         
-        # Compute the average for the metric over this period
-        avg_metric = period_data.groupBy("unq_id_in_src_sys").avg(metric).alias(f"{metric}_avg_{months}m")
+        period_data = df.filter((col("date") > period_start_date) & (col("date") <= period_end_date))
+        period_aggregations = period_data.groupBy("unq_id_in_src_sys").agg(
+            avg(metric).alias(f"{metric}_avg_{months}m")
+        )
 
-        # Join back to the main dataset to compute differences
-        df = df.join(avg_metric, "unq_id_in_src_sys", "left")
-        df = df.withColumn(f"{metric}_diff_from_m{months}", col(metric) - col(f"{metric}_avg_{months}m"))
-        df = df.withColumn(f"{metric}_sum_pct_diff_from_m{months}",
-                           (col(metric) - col(f"{metric}_avg_{months}m")) / when(col(f"{metric}_avg_{months}m") != 0, col(f"{metric}_avg_{months}m")).otherwise(1))
+        # Join period aggregations with the main DataFrame
+        results = results.join(period_aggregations, "unq_id_in_src_sys", "left")
 
-    return df
+        # Calculate the difference and percentage difference
+        results = results.withColumn(f"{metric}_diff_from_m{months}", col(metric) - col(f"{metric}_avg_{months}m"))
+        results = results.withColumn(f"{metric}_sum_pct_diff_from_m{months}",
+                                     (col(metric) - col(f"{metric}_avg_{months}m")) / when(col(f"{metric}_avg_{months}m") != 0, col(f"{metric}_avg_{months}m")).otherwise(1))
 
-# Compute features for counts and amounts for each client
+    return results
+
+# Compute features for each client
 features_df = client_aggregations
 for field in ["trans_loan_n_mortgage_cnt", "trans_loan_n_mortgage_amt"]:
-    features_df = calculate_client_features(features_df, field)
-
+    features_df = calculate_client_features(df, features_df, field, [2, 3, 6, 12])
 
 # Display the result
 features_df.show()
+
 
 
 # To get a DataFrame where each row corresponds to a client and each column is a feature, pivot the DataFrame
