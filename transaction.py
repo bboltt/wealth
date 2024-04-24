@@ -1,78 +1,50 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, sum, to_date, lit, expr, avg, when, add_months
-from pyspark.sql.window import Window
+from pyspark.sql.functions import col, to_date, expr, avg, add_months, when, substring
 
 # Start Spark session
 spark = SparkSession.builder.appName("Client Transaction Features Calculation").getOrCreate()
 
 # Load data
-df = spark.table("dm_wm.pwm_transactions")
+transactions_df = spark.table("dm_wm.pwm_transactions")
+reference_df = spark.table("your_reference_table")  # Load your reference DataFrame
 
-# Convert ods_business_dt to date format
-df = df.withColumn("date", to_date(col("ods_business_dt"), "yyyy-MM-dd"))
+# Convert date columns to date type
+transactions_df = transactions_df.withColumn("date", to_date(col("ods_business_dt"), "yyyy-MM-dd"))
+reference_df = reference_df.withColumn("open_date", to_date(col("open_date"), "yyyy-MM-dd"))
 
-# Define the reference date
-reference_date = to_date(lit("2024-01-01"), "yyyy-MM-dd")
+# Join reference_df to transactions_df to get the individual reference dates
+df = transactions_df.join(reference_df, "ip_id", "inner")
 
-# Filter data up to and including the reference date
-df = df.filter(col("date") <= reference_date)
-
-# Include transactions from up to 12 months before the reference date
-look_back_date = add_months(reference_date, -12)
-df = df.filter(col("date") > look_back_date)
-
-# Group by client ID and aggregate sums for relevant fields
-client_aggregations = df.groupBy("unq_id_in_src_sys").agg(
-    sum(col("transfer_outgoing_cnt") + col("mortgage_outgoing_cnt")).alias("trans_loan_n_mortgage_cnt"),
-    sum(col("transfer_outgoing_amt") + col("mortgage_outgoing_amt")).alias("trans_loan_n_mortgage_amt")
-)
-
-def calculate_client_features(df, reference_df, periods):
-    final_results = reference_df
+# Define function to calculate features based on individual reference dates
+def calculate_client_features(df, periods):
+    final_results = df.select("ip_id", "open_date").distinct()
 
     for months in periods:
-        # Define the date range for each period
-        period_start_date = add_months(reference_date, -months)
+        # Calculate the start date of the period based on each open_date
+        period_data = df.withColumn("period_start_date", add_months(col("open_date"), -months))
         
-        # Filter the main DataFrame for the period
-        period_data = df.filter((col("date") > period_start_date) & (col("date") <= reference_date))
+        # Filter transactions for the specific period
+        period_data = period_data.filter((col("date") > col("period_start_date")) & (col("date") <= col("open_date")))
         
         # Aggregate data for this period
-        period_aggregations = period_data.groupBy("unq_id_in_src_sys").agg(
-            avg(col("transfer_outgoing_cnt") + col("mortgage_outgoing_cnt")).alias("avg_trans_loan_n_mortgage_cnt"),
-            avg(col("transfer_outgoing_amt") + col("mortgage_outgoing_amt")).alias("avg_trans_loan_n_mortgage_amt")
+        period_aggregations = period_data.groupBy("ip_id", "open_date").agg(
+            avg("curr_bal_amt").alias(f"avg_bal_{months}m_hh_id")
         )
         
         # Join the period aggregations back to the final results DataFrame
-        for metric in ["trans_loan_n_mortgage_cnt", "trans_loan_n_mortgage_amt"]:
-            avg_metric = f"avg_{metric}_{months}m"
-            final_results = final_results.join(period_aggregations.select("unq_id_in_src_sys", col("avg_trans_loan_n_mortgage_cnt").alias(avg_metric)),
-                                               "unq_id_in_src_sys",
-                                               "left")
-            
-            # Calculate the difference and percentage difference
-            final_results = final_results.withColumn(f"{metric}_diff_from_m{months}", 
-                                                     col(metric) - col(avg_metric))
-            final_results = final_results.withColumn(f"{metric}_sum_pct_diff_from_m{months}",
-                                                     (col(metric) - col(avg_metric)) / when(col(avg_metric) != 0, col(avg_metric)).otherwise(1))
+        final_results = final_results.join(period_aggregations, ["ip_id", "open_date"], "left")
 
     return final_results
 
+# Periods of interest
+periods = [1, 3, 6]
+
 # Apply feature calculations
-features_df = calculate_client_features(df, client_aggregations, [2, 3, 6, 12])
+features_df = calculate_client_features(df, periods)
+
+# Modify the client ID to only keep the last 8 characters and rename the column
+features_df = features_df.withColumn("ip_id", substring(col("ip_id"), -8, 8))
 
 # Show the result
 features_df.show()
 
-
-
-
-
-
-# To get a DataFrame where each row corresponds to a client and each column is a feature, pivot the DataFrame
-# This step might require additional memory depending on the size of your data
-final_features_df = features_df.groupBy("unq_id_in_src_sys").pivot("year_month").agg(
-    *[lit(x).alias(x) for x in features_df.columns if x not in ["unq_id_in_src_sys", "year_month"]]
-)
-
-final_features_df.show(truncate=False)
