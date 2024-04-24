@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, sum, to_date, date_format, expr, when, avg
+from pyspark.sql.functions import col, sum, to_date, date_format, expr, when, avg, add_months
 from pyspark.sql.window import Window
 
 # Start Spark session
@@ -19,7 +19,7 @@ df = df.filter(col("date") <= reference_date)
 
 # Include transactions from up to 12 months before the reference date
 max_look_back_months = 12
-look_back_date = expr("add_months(to_date('2024-01-01'), -12)")
+look_back_date = add_months(reference_date, -max_look_back_months)
 df = df.filter(col("date") > look_back_date)
 
 # Group by client ID and aggregate sums for relevant fields
@@ -34,7 +34,7 @@ def calculate_client_features(df, reference_df, metric, periods):
 
     for months in periods:
         # Filter for the specific period
-        period_start_date = expr(f"add_months('{reference_date}', -{months})")
+        period_start_date = add_months(reference_date, -months)
         period_end_date = reference_date
         
         period_data = df.filter((col("date") > period_start_date) & (col("date") <= period_end_date))
@@ -59,6 +59,7 @@ for field in ["trans_loan_n_mortgage_cnt", "trans_loan_n_mortgage_amt"]:
 
 # Display the result
 features_df.show()
+
 
 
 
