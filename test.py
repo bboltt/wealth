@@ -26,16 +26,18 @@ def subsample_stratified_spark(df, label_col, product_col, zero_ratio, at_least,
         df0 = df_group_flag_0.alias('df0')
         df_group_flag = df1.join(df0, df1[product_col] == df0[product_col], 'outer')
 
-        # Handle product types with no Flag=1 records, filling in missing values
+        # Specify which DataFrame's column to use when filling NA values
+        # This assumes the joined DataFrame retains the alias
         df_group_flag = df_group_flag.na.fill({
-            'count_0': at_least / zero_ratio, 
+            'df0.count_0': at_least / zero_ratio, 
             'adjusted_count': at_least,
-            'count_1': 0  # Assuming no 'count_1' leads to a zero value
+            'df1.count_1': 0
         })
 
-        # Calculate fraction for subsampling
-        df_group_flag = df_group_flag.withColumn('fraction_col', col('adjusted_count') / col('count_0'))
-        fraction_dict = df_group_flag.select(product_col, 'fraction_col').rdd.collectAsMap()
+        # Specify which DataFrame's product_col to use for further operations
+        fraction_col = col('adjusted_count') / col('df0.count_0')
+        df_group_flag = df_group_flag.withColumn('fraction_col', fraction_col)
+        fraction_dict = df_group_flag.select(df1[product_col].alias(product_col), 'fraction_col').rdd.collectAsMap()
         
         # Apply subsampling to Flag=0 data
         sample_data_0 = df_flag_0.sampleBy(product_col, fractions=fraction_dict, seed=int(seed))
@@ -44,5 +46,6 @@ def subsample_stratified_spark(df, label_col, product_col, zero_ratio, at_least,
         subsampled_data_dict[seed] = sample_data
     
     return subsampled_data_dict
+
 
 
