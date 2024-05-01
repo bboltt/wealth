@@ -14,14 +14,17 @@ def subsample_stratified_spark(df, label_col, product_col, zero_ratio, at_least,
         df_flag_0 = df.filter(col(label_col) == 0)
         df_flag_1 = df.filter(col(label_col) == 1)
         
-        # Count by product type
+        # Count by product type and rename columns to avoid ambiguity
         df_group_flag_0 = df_flag_0.groupBy(product_col).count().withColumnRenamed('count', 'count_0')
         df_group_flag_1 = df_flag_1.groupBy(product_col).count().withColumnRenamed('count', 'count_1')
         
         # Adjust counts based on specified ratio and at_least parameter
         df_group_flag_1 = df_group_flag_1.withColumn('adjusted_count', col('count_1') * zero_ratio)
-        join_expr = col(f"{df_group_flag_1.alias('df1')}.{product_col}") == col(f"{df_group_flag_0.alias('df0')}.{product_col}")
-        df_group_flag = df_group_flag_1.alias('df1').join(df_group_flag_0.alias('df0'), join_expr, 'outer')
+
+        # Aliasing the DataFrames and using a DataFrame join condition
+        df1 = df_group_flag_1.alias('df1')
+        df0 = df_group_flag_0.alias('df0')
+        df_group_flag = df1.join(df0, df1[product_col] == df0[product_col], 'outer')
 
         # Handle product types with no Flag=1 records, filling in missing values
         df_group_flag = df_group_flag.na.fill({
@@ -41,4 +44,5 @@ def subsample_stratified_spark(df, label_col, product_col, zero_ratio, at_least,
         subsampled_data_dict[seed] = sample_data
     
     return subsampled_data_dict
+
 
