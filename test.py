@@ -160,5 +160,83 @@ experiment.time_series_validate_models()
 
 
 
+def train_model(self, data, validation=None):
+    # Load data into a DataFrame
+    df = data.toPandas()
+
+    # Preprocessing: Drop columns not in use
+    drop_columns = ['business_date', 'open_date', 'one_year_before_open_date']
+    df = df.drop(drop_columns, axis=1)
+
+    # Feature Engineering: Identify sparse and dense features
+    sparse_features = []
+    dense_features = []
+    for col in df.columns:
+        if col != self.label_col and df[col].dtype == 'object':
+            sparse_features.append(col)
+        elif col != self.label_col:
+            dense_features.append(col)
+
+    # Preprocessing: Convert data types and fill missing values
+    df[sparse_features] = df[sparse_features].astype(str)
+    df[dense_features] = df[dense_features].astype(float)
+    df[sparse_features] = df[sparse_features].fillna('-1')
+    df[dense_features] = df[dense_features].fillna(0)
+
+    # Preprocessing: Encode categorical features
+    for feat in sparse_features:
+        df[feat] = df[feat].astype('category').cat.codes
+
+    # Split features and target
+    X = df.drop(self.label_col, axis=1)
+    y = df[self.label_col]
+
+    # Define feature columns for DeepFM
+    feature_columns = [SparseFeat(feat, vocabulary_size=X[feat].max() + 1, embedding_dim=4)
+                       for feat in sparse_features] + [DenseFeat(feat, 1) for feat in dense_features]
+
+    # Build DeepFM model
+    model = DeepFM(feature_columns, task='binary')
+
+    # Compile model
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+    if validation is None:
+        # Train model on whole data
+        model.fit(X, y, batch_size=256, epochs=10, validation_split=0.2)
+        # Evaluate model on whole data
+        print("Metrics on whole data:")
+        self.evaluate_model(model, X, y)
+    elif 0 < validation < 1:
+        # Split data into train and validation sets
+        train_size = int((1 - validation) * len(df))
+        X_train, X_val = X[:train_size], X[train_size:]
+        y_train, y_val = y[:train_size], y[train_size:]
+        # Train model on train data
+        model.fit(X_train, y_train, batch_size=256, epochs=10, validation_data=(X_val, y_val))
+        # Evaluate model on validation data
+        print("Metrics on validation data:")
+        self.evaluate_model(model, X_val, y_val)
+    else:
+        raise ValueError("Validation parameter must be None or a value between 0 and 1")
+
+    return model
+
+def evaluate_model(self, model, X, y):
+    # Perform predictions
+    pred_prob = model.predict(X)
+    pred_labels = (pred_prob >= 0.5).astype(int)
+
+    # Compute evaluation metrics
+    auc = roc_auc_score(y, pred_prob)
+    precision = precision_score(y, pred_labels)
+    recall = recall_score(y, pred_labels)
+    f1 = f1_score(y, pred_labels)
+
+    # Print metrics
+    print("AUC:", auc)
+    print("Precision:", precision)
+    print("Recall:", recall)
+    print("F1 Score:", f1)
 
 
