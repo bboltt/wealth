@@ -1,0 +1,44 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import countDistinct, sum, avg, expr
+
+def create_spark_session():
+    return SparkSession.builder \
+        .appName("Product Features Aggregation") \
+        .getOrCreate()
+
+def count_users_per_product(df):
+    return df.groupBy("prd_name").agg(
+        countDistinct("ip_id").alias("total_users"),
+        countDistinct(expr("CASE WHEN open_date IS NOT NULL THEN ip_id ELSE NULL END")).alias("users_opened"),
+        countDistinct(expr("CASE WHEN close_date IS NOT NULL THEN ip_id ELSE NULL END")).alias("users_closed")
+    )
+
+def financial_metrics_per_product(df):
+    return df.groupBy("prd_name").agg(
+        sum("curr_bal_amt").alias("total_current_balance"),
+        avg("curr_bal_amt").alias("avg_current_balance"),
+        sum("ledger_bal_amt").alias("total_ledger_balance"),
+        avg("ledger_bal_amt").alias("avg_ledger_balance")
+    )
+
+def average_open_duration_per_product(df):
+    return df.withColumn("open_days", expr("DATEDIFF(close_date, open_date)")) \
+        .groupBy("prd_name") \
+        .agg(avg("open_days").alias("avg_open_duration_days"))
+
+def aggregate_product_features(df):
+    spark = create_spark_session()
+    df1 = count_users_per_product(df)
+    df2 = financial_metrics_per_product(df)
+    df3 = average_open_duration_per_product(df)
+
+    # Join all feature dataframes on 'prd_name'
+    df_final = df1.join(df2, "prd_name", "outer") \
+                  .join(df3, "prd_name", "outer")
+    return df_final
+
+# Example usage:
+# spark = create_spark_session()
+# df = spark.read.load("your_data_path")
+# product_features_df = aggregate_product_features(df)
+# product_features_df.show()
