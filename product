@@ -15,6 +15,14 @@ def count_users_per_product(df):
         countDistinct(expr("CASE WHEN close_date IS NOT NULL THEN ip_id ELSE NULL END")).alias("users_closed")
     )
 
+def financial_metrics_per_product(df):
+    return df.groupBy("prd_name").agg(
+        sum("curr_bal_amt").alias("total_current_balance"),
+        avg("curr_bal_amt").alias("avg_current_balance"),
+        sum("ledger_bal_amt").alias("total_ledger_balance"),
+        avg("ledger_bal_amt").alias("avg_ledger_balance")
+    )
+
 def advanced_financial_metrics(df):
     return df.groupBy("prd_name").agg(
         stddev("curr_bal_amt").alias("stddev_current_balance"),
