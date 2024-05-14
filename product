@@ -11,18 +11,25 @@ def advanced_financial_metrics(df):
     )
 
 def temporal_features(df):
-    # Extract month and year from 'open_date'
+    # Add month and year columns to the DataFrame
     df = df.withColumn("month", month("open_date")) \
            .withColumn("year", year("open_date"))
     
-    # Group by 'prd_name', pivot on 'month', and calculate averages and counts
-    return df.groupBy("prd_name").pivot("month").agg(
-        avg("curr_bal_amt").alias("month_avg_monthly_balance"),
-        countDistinct("ip_id").alias("month_count_users_opened")
-    ).select(
-        "prd_name",
-        *[expr(f"`{c}` as `month_{c.split('_')[0]}_{c.split('_')[1]}`") for c in df.columns if c.startswith('avg') or c.startswith('count')]
+    # Pivot on month and perform aggregations
+    temp_df = df.groupBy("prd_name").pivot("month", list(range(1, 13))).agg(
+        avg("curr_bal_amt").alias("avg_monthly_balance"),
+        countDistinct("ip_id").alias("count_users_opened")
     )
+
+    # Renaming columns to add 'month_' prefix and fill nulls with zeros
+    for month_num in range(1, 13):
+        avg_col = f"{month_num}_avg_monthly_balance"
+        count_col = f"{month_num}_count_users_opened"
+        temp_df = temp_df.withColumnRenamed(avg_col, f"month_{month_num}_avg_monthly_balance") \
+                         .withColumnRenamed(count_col, f"month_{month_num}_count_users_opened") \
+                         .na.fill({f"month_{month_num}_avg_monthly_balance": 0, f"month_{month_num}_count_users_opened": 0})
+
+    return temp_df
 
 def interaction_intensity_features(df):
     return df.groupBy("prd_name").agg(
@@ -50,6 +57,7 @@ spark = generate_spark_instance(total_memory=300, total_vcpu=150)
 df = spark.sql("select * from dm_r3.pwm_mstr_dtl_daily")
 product_features_df = aggregate_product_features(spark, df)
 product_features_df.show()
+
 
 
 
