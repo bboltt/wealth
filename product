@@ -55,21 +55,28 @@ def get_latest_product_status(df):
 
 
 def advanced_temporal_features(df):
-    df = df.withColumn("day_of_week", dayofweek("open_date"))
-    return df.groupBy("prd_name").pivot("day_of_week").agg(
-        avg("curr_bal_amt").alias("avg_daily_balance")
+    day_of_week_df = df.withColumn("day_of_week", dayofweek("open_date"))
+    return day_of_week_df.groupBy("prd_name").pivot("day_of_week").agg(
+        min("curr_bal_amt").alias("min_daily_balance"),
+        max("curr_bal_amt").alias("max_daily_balance"),
+        avg("curr_bal_amt").alias("avg_daily_balance"),
+        stddev("curr_bal_amt").alias("std_daily_balance")
+    ).select(
+        "prd_name",
+        *[col(c).alias(f"day_{c.split('_')[0]}_{c.split('_')[1]}_{c.split('_')[2]}") for c in day_of_week_df.columns if "balance" in c]
     )
 
 def financial_variability_features(df):
     return df.groupBy("prd_name").agg(
-        (stddev("curr_bal_amt") / mean("curr_bal_amt")).alias("coefficient_of_variation")
+        min("curr_bal_amt").alias("min_current_balance"),
+        max("curr_bal_amt").alias("max_current_balance"),
+        avg("curr_bal_amt").alias("avg_current_balance"),
+        stddev("curr_bal_amt").alias("std_current_balance"),
+        min("ledger_bal_amt").alias("min_ledger_balance"),
+        max("ledger_bal_amt").alias("max_ledger_balance"),
+        avg("ledger_bal_amt").alias("avg_ledger_balance"),
+        stddev("ledger_bal_amt").alias("std_ledger_balance")
     )
-
-def cross_product_interactions(df):
-    # Assuming a column 'user_id' that uniquely identifies users
-    user_products = df.groupBy("ip_id").agg(countDistinct("prd_name").alias("number_of_products"))
-    more_than_one_product = user_products.filter(col("number_of_products") > 1).count()
-    return df.withColumn("cross_product_users", lit(more_than_one_product))
 
 
 def aggregate_product_features(spark, df, reference_date):
@@ -80,21 +87,17 @@ def aggregate_product_features(spark, df, reference_date):
     df_financial = financial_metrics_per_product(df_latest_status)
     df_advanced_financial = advanced_financial_metrics(df_latest_status)
     df_temporal = temporal_features(df_latest_status)  # Original temporal features
-    df_interaction = interaction_intensity_features(df_latest_status)
-    df_average_duration = average_open_duration_per_product(df_latest_status)
     df_advanced_temporal = advanced_temporal_features(df_latest_status)  # Advanced temporal features
     df_financial_variability = financial_variability_features(df_latest_status)
-    df_cross_product = cross_product_interactions(df_latest_status)
+    df_average_duration = average_open_duration_per_product(df_latest_status)
 
     # Join all feature dataframes on 'prd_name'
     df_final = df_basic.join(df_financial, "prd_name", "outer") \
                        .join(df_advanced_financial, "prd_name", "outer") \
                        .join(df_temporal, "prd_name", "outer") \
                        .join(df_advanced_temporal, "prd_name", "outer") \
-                       .join(df_interaction, "prd_name", "outer") \
-                       .join(df_average_duration, "prd_name", "outer") \
                        .join(df_financial_variability, "prd_name", "outer") \
-                       .join(df_cross_product, "prd_name", "outer")
+                       .join(df_average_duration, "prd_name", "outer")
 
     return df_final
 
@@ -107,6 +110,14 @@ df = spark.sql("select * from dm_r3.pwm_mstr_dtl_daily")
 reference_date = '2023-12-31'
 product_features_df = aggregate_product_features(spark, df, reference_date)
 product_features_df.show()
+
+
+
+
+
+
+
+
 
 
 
