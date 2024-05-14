@@ -1,5 +1,12 @@
 from pyspark.sql.functions import countDistinct, sum, avg, expr, stddev, min, max, month, year
 
+
+def filter_data_by_date(df, reference_date):
+    """
+    Filters the DataFrame to only include records on or before the given reference date.
+    """
+    return df.filter(col("open_date") <= lit(reference_date))
+
 def advanced_financial_metrics(df):
     return df.groupBy("prd_name").agg(
         stddev("curr_bal_amt").alias("stddev_current_balance"),
@@ -36,13 +43,26 @@ def interaction_intensity_features(df):
         expr("COUNT(ip_id) / COUNT(DISTINCT ip_id)").alias("avg_interactions_per_user")
     )
 
-def aggregate_product_features(spark, df):
-    df_basic = count_users_per_product(df)
-    df_financial = financial_metrics_per_product(df)
-    df_advanced_financial = advanced_financial_metrics(df)
-    df_temporal = temporal_features(df)
-    df_interaction = interaction_intensity_features(df)
-    df_average_duration = average_open_duration_per_product(df)
+def get_latest_product_status(df):
+    """
+    For each product, find the record with the latest open date.
+    """
+    # Determine the maximum open date for each product
+    latest_dates = df.groupBy("prd_name").agg(max("open_date").alias("latest_date"))
+    
+    # Join this back to the original df to get the full row of the latest record for each product
+    return df.join(latest_dates, (df["prd_name"] == latest_dates["prd_name"]) & (df["open_date"] == latest_dates["latest_date"])).drop(latest_dates["prd_name"])
+
+def aggregate_product_features(spark, df, reference_date):
+    df_filtered = filter_data_by_date(df, reference_date)
+    df_latest_status = get_latest_product_status(df_filtered)
+
+    df_basic = count_users_per_product(df_latest_status)
+    df_financial = financial_metrics_per_product(df_latest_status)
+    df_advanced_financial = advanced_financial_metrics(df_latest_status)
+    df_temporal = temporal_features(df_latest_status)
+    df_interaction = interaction_intensity_features(df_latest_status)
+    df_average_duration = average_open_duration_per_product(df_latest_status)
 
     # Join all feature dataframes on 'prd_name'
     df_final = df_basic.join(df_financial, "prd_name", "outer") \
@@ -52,12 +72,14 @@ def aggregate_product_features(spark, df):
                        .join(df_average_duration, "prd_name", "outer")
     return df_final
 
+
+
 # Example usage
 spark = generate_spark_instance(total_memory=300, total_vcpu=150)
 df = spark.sql("select * from dm_r3.pwm_mstr_dtl_daily")
-product_features_df = aggregate_product_features(spark, df)
+reference_date = '2023-12-31'
+product_features_df = aggregate_product_features(spark, df, reference_date)
 product_features_df.show()
-
 
 
 
