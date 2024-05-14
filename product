@@ -7,6 +7,14 @@ def filter_data_by_date(df, reference_date):
     """
     return df.filter(col("open_date") <= lit(reference_date))
 
+
+def count_users_per_product(df):
+    return df.groupBy("prd_name").agg(
+        countDistinct("ip_id").alias("total_users"),
+        countDistinct(expr("CASE WHEN open_date IS NOT NULL THEN ip_id ELSE NULL END")).alias("users_opened"),
+        countDistinct(expr("CASE WHEN close_date IS NOT NULL THEN ip_id ELSE NULL END")).alias("users_closed")
+    )
+
 def advanced_financial_metrics(df):
     return df.groupBy("prd_name").agg(
         stddev("curr_bal_amt").alias("stddev_current_balance"),
