@@ -11,12 +11,18 @@ def advanced_financial_metrics(df):
     )
 
 def temporal_features(df):
-    return df.withColumn("month", month("open_date")) \
-             .withColumn("year", year("open_date")) \
-             .groupBy("prd_name").pivot("month").agg(
-                 avg("curr_bal_amt").alias("avg_monthly_balance"),
-                 countDistinct("ip_id").alias("count_users_opened")
-             )
+    # Extract month and year from 'open_date'
+    df = df.withColumn("month", month("open_date")) \
+           .withColumn("year", year("open_date"))
+    
+    # Group by 'prd_name', pivot on 'month', and calculate averages and counts
+    return df.groupBy("prd_name").pivot("month").agg(
+        avg("curr_bal_amt").alias("month_avg_monthly_balance"),
+        countDistinct("ip_id").alias("month_count_users_opened")
+    ).select(
+        "prd_name",
+        *[expr(f"`{c}` as `month_{c.split('_')[0]}_{c.split('_')[1]}`") for c in df.columns if c.startswith('avg') or c.startswith('count')]
+    )
 
 def interaction_intensity_features(df):
     return df.groupBy("prd_name").agg(
@@ -44,4 +50,6 @@ spark = generate_spark_instance(total_memory=300, total_vcpu=150)
 df = spark.sql("select * from dm_r3.pwm_mstr_dtl_daily")
 product_features_df = aggregate_product_features(spark, df)
 product_features_df.show()
+
+
 
