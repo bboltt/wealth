@@ -1,44 +1,47 @@
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import countDistinct, sum, avg, expr
+from pyspark.sql.functions import countDistinct, sum, avg, expr, stddev, min, max, month, year
 
-def create_spark_session():
-    return SparkSession.builder \
-        .appName("Product Features Aggregation") \
-        .getOrCreate()
-
-def count_users_per_product(df):
+def advanced_financial_metrics(df):
     return df.groupBy("prd_name").agg(
-        countDistinct("ip_id").alias("total_users"),
-        countDistinct(expr("CASE WHEN open_date IS NOT NULL THEN ip_id ELSE NULL END")).alias("users_opened"),
-        countDistinct(expr("CASE WHEN close_date IS NOT NULL THEN ip_id ELSE NULL END")).alias("users_closed")
+        stddev("curr_bal_amt").alias("stddev_current_balance"),
+        min("curr_bal_amt").alias("min_current_balance"),
+        max("curr_bal_amt").alias("max_current_balance"),
+        stddev("ledger_bal_amt").alias("stddev_ledger_balance"),
+        min("ledger_bal_amt").alias("min_ledger_balance"),
+        max("ledger_bal_amt").alias("max_ledger_balance")
     )
 
-def financial_metrics_per_product(df):
+def temporal_features(df):
+    return df.withColumn("month", month("open_date")) \
+             .withColumn("year", year("open_date")) \
+             .groupBy("prd_name").pivot("month").agg(
+                 avg("curr_bal_amt").alias("avg_monthly_balance"),
+                 countDistinct("ip_id").alias("count_users_opened")
+             )
+
+def interaction_intensity_features(df):
     return df.groupBy("prd_name").agg(
-        sum("curr_bal_amt").alias("total_current_balance"),
-        avg("curr_bal_amt").alias("avg_current_balance"),
-        sum("ledger_bal_amt").alias("total_ledger_balance"),
-        avg("ledger_bal_amt").alias("avg_ledger_balance")
+        expr("COUNT(ip_id) / COUNT(DISTINCT ip_id)").alias("avg_interactions_per_user")
     )
 
-def average_open_duration_per_product(df):
-    return df.withColumn("open_days", expr("DATEDIFF(close_date, open_date)")) \
-        .groupBy("prd_name") \
-        .agg(avg("open_days").alias("avg_open_duration_days"))
-
-def aggregate_product_features(df):
-    spark = create_spark_session()
-    df1 = count_users_per_product(df)
-    df2 = financial_metrics_per_product(df)
-    df3 = average_open_duration_per_product(df)
+def aggregate_product_features(spark, df):
+    df_basic = count_users_per_product(df)
+    df_financial = financial_metrics_per_product(df)
+    df_advanced_financial = advanced_financial_metrics(df)
+    df_temporal = temporal_features(df)
+    df_interaction = interaction_intensity_features(df)
+    df_average_duration = average_open_duration_per_product(df)
 
     # Join all feature dataframes on 'prd_name'
-    df_final = df1.join(df2, "prd_name", "outer") \
-                  .join(df3, "prd_name", "outer")
+    df_final = df_basic.join(df_financial, "prd_name", "outer") \
+                       .join(df_advanced_financial, "prd_name", "outer") \
+                       .join(df_temporal, "prd_name", "outer") \
+                       .join(df_interaction, "prd_name", "outer") \
+                       .join(df_average_duration, "prd_name", "outer")
     return df_final
 
-# Example usage:
-# spark = create_spark_session()
-# df = spark.read.load("your_data_path")
-# product_features_df = aggregate_product_features(df)
-# product_features_df.show()
+# Example usage
+spark = generate_spark_instance(total_memory=300, total_vcpu=150)
+df = spark.sql("select * from dm_r3.pwm_mstr_dtl_daily")
+product_features_df = aggregate_product_features(spark, df)
+product_features_df.show()
+
