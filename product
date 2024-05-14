@@ -23,6 +23,12 @@ def financial_metrics_per_product(df):
         avg("ledger_bal_amt").alias("avg_ledger_balance")
     )
 
+
+def average_open_duration_per_product(df):
+    return df.withColumn("open_days", expr("DATEDIFF(close_date, open_date)")) \
+        .groupBy("prd_name") \
+        .agg(avg("open_days").alias("avg_open_duration_days"))
+
 def advanced_financial_metrics(df):
     return df.groupBy("prd_name").agg(
         stddev("curr_bal_amt").alias("stddev_current_balance"),
