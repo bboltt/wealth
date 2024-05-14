@@ -83,15 +83,16 @@ def aggregate_product_features(spark, df, reference_date):
     df_filtered = filter_data_by_date(df, reference_date)
     df_latest_status = get_latest_product_status(df_filtered)
 
+    # Generate features
     df_basic = count_users_per_product(df_latest_status)
     df_financial = financial_metrics_per_product(df_latest_status)
     df_advanced_financial = advanced_financial_metrics(df_latest_status)
-    df_temporal = temporal_features(df_latest_status)  # Original temporal features
-    df_advanced_temporal = advanced_temporal_features(df_latest_status)  # Advanced temporal features
+    df_temporal = temporal_features(df_latest_status)
+    df_advanced_temporal = advanced_temporal_features(df_latest_status)
     df_financial_variability = financial_variability_features(df_latest_status)
     df_average_duration = average_open_duration_per_product(df_latest_status)
 
-    # Join all feature dataframes on 'prd_name'
+    # Join all feature dataframes on 'prd_name', ensuring all possible columns are retained
     df_final = df_basic.join(df_financial, "prd_name", "outer") \
                        .join(df_advanced_financial, "prd_name", "outer") \
                        .join(df_temporal, "prd_name", "outer") \
@@ -99,9 +100,8 @@ def aggregate_product_features(spark, df, reference_date):
                        .join(df_financial_variability, "prd_name", "outer") \
                        .join(df_average_duration, "prd_name", "outer")
 
+
     return df_final
-
-
 
 
 # Example usage
