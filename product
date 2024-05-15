@@ -136,6 +136,49 @@ product_features_df.show()
 
 
 
+from pyspark.sql.functions import col, lit, expr
+
+def aggregate_product_features(spark, main_df, reference_df):
+    # Join the main DataFrame with the reference DataFrame on 'ip_id' where 'prd_name' matches 'Segmt_Prod_Type'
+    condition = [main_df.ip_id == reference_df.ip_id, main_df.prd_name == reference_df.Segmt_Prod_Type]
+    df_joined = main_df.join(reference_df, condition, "inner").select(main_df["*"], reference_df["open_date"].alias("reference_date"))
+
+    # Define a user-defined function to filter data by date dynamically for each row
+    def filter_data(df, date_col):
+        return df.filter(col("business_date") <= col(date_col))
+
+    # Apply the filtering function dynamically for each row
+    df_filtered = filter_data(df_joined, "reference_date")
+
+    # Now calculate the features based on the filtered data
+    df_basic = count_users_per_product(df_filtered)
+    df_financial = financial_metrics_per_product(df_filtered)
+    df_advanced_financial = advanced_financial_metrics(df_filtered)
+    df_temporal = temporal_features(df_filtered)
+    df_advanced_temporal = advanced_temporal_features(df_filtered)
+    df_financial_variability = financial_variability_features(df_filtered)
+    df_average_duration = average_open_duration_per_product(df_filtered)
+
+    # Aggregate all features
+    df_final = df_basic.join(df_financial, "prd_name", "outer") \
+                       .join(df_advanced_financial, "prd_name", "outer") \
+                       .join(df_temporal, "prd_name", "outer") \
+                       .join(df_advanced_temporal, "prd_name", "outer") \
+                       .join(df_financial_variability, "prd_name", "outer") \
+                       .join(df_average_duration, "prd_name", "outer")
+
+    return df_final
+
+# Example usage
+spark = generate_spark_instance(total_memory=300, total_vcpu=150)
+main_df = spark.sql("select * from dm_r3.pwm_mstr_dtl_daily")
+reference_df = spark.sql("select * from reference_data_table")  # Assume this has the schema you described
+product_features_df = aggregate_product_features(spark, main_df, reference_df)
+product_features_df.show()
+
+
+
+
 
 
 
