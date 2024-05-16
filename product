@@ -137,7 +137,8 @@ product_features_df.show()
 
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, lit, expr, countDistinct, sum, avg, stddev, min, max, month, year, dayofweek
+from pyspark.sql.functions import col, lit, expr, countDistinct, sum, avg, stddev, min, max, month, year, dayofweek, when
+from pyspark.sql.window import Window
 
 # Create Spark session
 def generate_spark_instance(total_memory, total_vcpu):
@@ -149,20 +150,26 @@ def generate_spark_instance(total_memory, total_vcpu):
     return spark
 
 # Filter data by date
-def filter_data_by_date(df, open_date):
-    return df.filter(col("open_date") <= lit(open_date))
+def filter_data_by_date(df, reference_df):
+    return df.join(reference_df, (df["prd_name"] == reference_df["Segmt_Prod_Type"]) & (df["open_date"] <= reference_df["open_date"]))
+
+# Get the latest product status for each product and reference date
+def get_latest_product_status(df):
+    window_spec = Window.partitionBy("Segmt_Prod_Type", "open_date").orderBy(col("open_date").desc())
+    df_latest = df.withColumn("row_num", expr("row_number() over (window_spec)")).filter(col("row_num") == 1).drop("row_num")
+    return df_latest
 
 # Count users per product
 def count_users_per_product(df):
-    return df.groupBy("prd_name").agg(
+    return df.groupBy("prd_name", "open_date").agg(
         countDistinct("ip_id").alias("total_users"),
-        countDistinct(expr("CASE WHEN open_date IS NOT NULL THEN ip_id ELSE NULL END")).alias("users_opened"),
-        countDistinct(expr("CASE WHEN close_date IS NOT NULL THEN ip_id ELSE NULL END")).alias("users_closed")
+        countDistinct(when(col("open_date").isNotNull(), "ip_id")).alias("users_opened"),
+        countDistinct(when(col("close_date").isNotNull(), "ip_id")).alias("users_closed")
     )
 
 # Financial metrics per product
 def financial_metrics_per_product(df):
-    return df.groupBy("prd_name").agg(
+    return df.groupBy("prd_name", "open_date").agg(
         sum("curr_bal_amt").alias("total_current_balance"),
         avg("curr_bal_amt").alias("avg_current_balance"),
         sum("ledger_bal_amt").alias("total_ledger_balance"),
@@ -172,12 +179,12 @@ def financial_metrics_per_product(df):
 # Average open duration per product
 def average_open_duration_per_product(df):
     return df.withColumn("open_days", expr("DATEDIFF(close_date, open_date)")) \
-        .groupBy("prd_name") \
+        .groupBy("prd_name", "open_date") \
         .agg(avg("open_days").alias("avg_open_duration_days"))
 
 # Advanced financial metrics
 def advanced_financial_metrics(df):
-    return df.groupBy("prd_name").agg(
+    return df.groupBy("prd_name", "open_date").agg(
         stddev("curr_bal_amt").alias("stddev_current_balance"),
         min("curr_bal_amt").alias("min_current_balance"),
         max("curr_bal_amt").alias("max_current_balance"),
@@ -191,7 +198,7 @@ def temporal_features(df):
     df = df.withColumn("month", month("open_date")) \
            .withColumn("year", year("open_date"))
 
-    temp_df = df.groupBy("prd_name").pivot("month", list(range(1, 13))).agg(
+    temp_df = df.groupBy("prd_name", "open_date").pivot("month", list(range(1, 13))).agg(
         avg("curr_bal_amt").alias("avg_monthly_balance"),
         countDistinct("ip_id").alias("count_users_opened")
     )
@@ -205,33 +212,23 @@ def temporal_features(df):
 
     return temp_df
 
-# Interaction intensity features
-def interaction_intensity_features(df):
-    return df.groupBy("prd_name").agg(
-        expr("COUNT(ip_id) / COUNT(DISTINCT ip_id)").alias("avg_interactions_per_user")
-    )
-
-# Get latest product status
-def get_latest_product_status(df, ref_date):
-    latest_dates = df.filter(col("open_date") <= ref_date).groupBy("prd_name").agg(max("open_date").alias("latest_date"))
-    return df.join(latest_dates, (df["prd_name"] == latest_dates["prd_name"]) & (df["open_date"] == latest_dates["latest_date"])).drop(latest_dates["prd_name"])
-
 # Advanced temporal features
 def advanced_temporal_features(df):
     day_of_week_df = df.withColumn("day_of_week", dayofweek("open_date"))
-    return day_of_week_df.groupBy("prd_name").pivot("day_of_week").agg(
+    return day_of_week_df.groupBy("prd_name", "open_date").pivot("day_of_week").agg(
         min("curr_bal_amt").alias("min_daily_balance"),
         max("curr_bal_amt").alias("max_daily_balance"),
         avg("curr_bal_amt").alias("avg_daily_balance"),
         stddev("curr_bal_amt").alias("std_daily_balance")
     ).select(
         "prd_name",
+        "open_date",
         *[col(c).alias(f"day_{c.split('_')[0]}_{c.split('_')[1]}_{c.split('_')[2]}") for c in day_of_week_df.columns if "balance" in c]
     )
 
 # Financial variability features
 def financial_variability_features(df):
-    return df.groupBy("prd_name").agg(
+    return df.groupBy("prd_name", "open_date").agg(
         min("curr_bal_amt").alias("min_current_balance"),
         max("curr_bal_amt").alias("max_current_balance"),
         avg("curr_bal_amt").alias("avg_current_balance"),
@@ -242,55 +239,33 @@ def financial_variability_features(df):
         stddev("ledger_bal_amt").alias("std_ledger_balance")
     )
 
-# Aggregate product features for each record in the reference DataFrame
-def aggregate_product_features_for_records(spark, df, reference_df):
-    from pyspark.sql.functions import col, max as spark_max
-    from pyspark.sql import Window
+# Aggregate product features
+def aggregate_product_features(spark, df, reference_df):
+    df_filtered = filter_data_by_date(df, reference_df)
+    df_latest_status = get_latest_product_status(df_filtered)
 
-    def get_latest_product_status_for_date(df, ref_date):
-        latest_dates = df.filter(col("open_date") <= ref_date).groupBy("prd_name").agg(spark_max("open_date").alias("latest_date"))
-        return df.join(latest_dates, (df["prd_name"] == latest_dates["prd_name"]) & (df["open_date"] == latest_dates["latest_date"])).drop(latest_dates["prd_name"])
+    # Generate features
+    df_basic = count_users_per_product(df_latest_status)
+    df_financial = financial_metrics_per_product(df_latest_status)
+    df_advanced_financial = advanced_financial_metrics(df_latest_status)
+    df_temporal = temporal_features(df_latest_status)
+    df_advanced_temporal = advanced_temporal_features(df_latest_status)
+    df_financial_variability = financial_variability_features(df_latest_status)
+    df_average_duration = average_open_duration_per_product(df_latest_status)
 
-    df_final = None
+    # Include geographical and product category features
+    df_geographical = df_latest_status.select("prd_name", "open_date", "st_name", "cntry_name", "city_name")
+    df_product_category = df_latest_status.select("prd_name", "open_date", "prd_dm_name", "prd_cls_name")
 
-    for row in reference_df.collect():
-        open_date = row['open_date']
-        prd_name = row['Segmt_Prod_Type']
-
-        df_filtered = filter_data_by_date(df, open_date)
-        df_latest_status = get_latest_product_status_for_date(df_filtered, open_date)
-
-        # Generate features
-        df_basic = count_users_per_product(df_latest_status)
-        df_financial = financial_metrics_per_product(df_latest_status)
-        df_advanced_financial = advanced_financial_metrics(df_latest_status)
-        df_temporal = temporal_features(df_latest_status)
-        df_advanced_temporal = advanced_temporal_features(df_latest_status)
-        df_financial_variability = financial_variability_features(df_latest_status)
-        df_average_duration = average_open_duration_per_product(df_latest_status)
-
-        # Include geographical and product category features
-        df_geographical = df_latest_status.select("prd_name", "st_name", "cntry_name", "city_name")
-        df_product_category = df_latest_status.select("prd_name", "prd_dm_name", "prd_cls_name")
-
-        # Join all feature dataframes on 'prd_name', ensuring all possible columns are retained
-        df_agg = df_basic.join(df_financial, "prd_name", "outer") \
-                         .join(df_advanced_financial, "prd_name", "outer") \
-                         .join(df_temporal, "prd_name", "outer") \
-                         .join(df_advanced_temporal, "prd_name", "outer") \
-                         .join(df_financial_variability, "prd_name", "outer") \
-                         .join(df_average_duration, "prd_name", "outer") \
-                         .join(df_geographical, "prd_name", "outer") \
-                         .join(df_product_category, "prd_name", "outer")
-
-        # Add open_date column
-        df_agg = df_agg.withColumn("open_date", lit(open_date))
-
-        # Union with the final DataFrame
-        if df_final is None:
-            df_final = df_agg
-        else:
-            df_final = df_final.union(df_agg)
+    # Join all feature dataframes on 'prd_name' and 'open_date', ensuring all possible columns are retained
+    df_final = df_basic.join(df_financial, ["prd_name", "open_date"], "outer") \
+                       .join(df_advanced_financial, ["prd_name", "open_date"], "outer") \
+                       .join(df_temporal, ["prd_name", "open_date"], "outer") \
+                       .join(df_advanced_temporal, ["prd_name", "open_date"], "outer") \
+                       .join(df_financial_variability, ["prd_name", "open_date"], "outer") \
+                       .join(df_average_duration, ["prd_name", "open_date"], "outer") \
+                       .join(df_geographical, ["prd_name", "open_date"], "outer") \
+                       .join(df_product_category, ["prd_name", "open_date"], "outer")
 
     return df_final
 
@@ -299,9 +274,10 @@ spark = generate_spark_instance(total_memory=300, total_vcpu=150)
 df = spark.sql("select * from dm_r3.pwm_mstr_dtl_daily")
 reference_df = spark.sql("select ip_id, Segmt_Prod_Type, business_date, open_date, one_year_before_open_date, Flag from your_reference_table")
 
-# Aggregate product features for each record in the reference DataFrame
-product_features_df = aggregate_product_features_for_records(spark, df, reference_df)
+# Aggregate product features
+product_features_df = aggregate_product_features(spark, df, reference_df)
 product_features_df.show()
+
 
 
 
