@@ -137,7 +137,7 @@ product_features_df.show()
 
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, expr, countDistinct, sum, avg, stddev, min, max, month, year, dayofweek, when, row_number
+from pyspark.sql.functions import col, expr, countDistinct, sum, avg, stddev, min, max, month, year, dayofweek, when, row_number, broadcast
 from pyspark.sql.window import Window
 
 # Create Spark session
@@ -146,6 +146,8 @@ def generate_spark_instance(total_memory, total_vcpu):
         .appName("RecommendationSystem") \
         .config("spark.executor.memory", f"{total_memory}g") \
         .config("spark.executor.cores", total_vcpu) \
+        .config("spark.sql.shuffle.partitions", "200") \
+        .config("spark.sql.autoBroadcastJoinThreshold", "-1") \
         .getOrCreate()
     return spark
 
@@ -159,7 +161,7 @@ def disambiguate_columns(df, suffix):
 def filter_data_by_date(df, reference_df):
     df = disambiguate_columns(df, "df")
     reference_df = disambiguate_columns(reference_df, "ref")
-    return df.join(reference_df, (df["prd_name_df"] == reference_df["Segmt_Prod_Type_ref"]) & (df["open_date_df"] <= reference_df["open_date_ref"]))
+    return df.join(broadcast(reference_df), (df["prd_name_df"] == reference_df["Segmt_Prod_Type_ref"]) & (df["open_date_df"] <= reference_df["open_date_ref"]))
 
 # Get latest product status for each product and reference date
 def get_latest_product_status(df):
@@ -249,21 +251,21 @@ def financial_variability_features(df):
 
 # Aggregate product features
 def aggregate_product_features(spark, df, reference_df):
-    df_filtered = filter_data_by_date(df, reference_df)
-    df_latest_status = get_latest_product_status(df_filtered)
+    df_filtered = filter_data_by_date(df, reference_df).cache()
+    df_latest_status = get_latest_product_status(df_filtered).cache()
 
     # Generate features
-    df_basic = count_users_per_product(df_latest_status)
-    df_financial = financial_metrics_per_product(df_latest_status)
-    df_advanced_financial = advanced_financial_metrics(df_latest_status)
-    df_temporal = temporal_features(df_latest_status)
-    df_advanced_temporal = advanced_temporal_features(df_latest_status)
-    df_financial_variability = financial_variability_features(df_latest_status)
-    df_average_duration = average_open_duration_per_product(df_latest_status)
+    df_basic = count_users_per_product(df_latest_status).cache()
+    df_financial = financial_metrics_per_product(df_latest_status).cache()
+    df_advanced_financial = advanced_financial_metrics(df_latest_status).cache()
+    df_temporal = temporal_features(df_latest_status).cache()
+    df_advanced_temporal = advanced_temporal_features(df_latest_status).cache()
+    df_financial_variability = financial_variability_features(df_latest_status).cache()
+    df_average_duration = average_open_duration_per_product(df_latest_status).cache()
 
     # Include geographical and product category features
-    df_geographical = df_latest_status.select("prd_name_df", "open_date_ref", "st_name_df", "cntry_name_df", "city_name_df")
-    df_product_category = df_latest_status.select("prd_name_df", "open_date_ref", "prd_dm_name_df", "prd_cls_name_df")
+    df_geographical = df_latest_status.select("prd_name_df", "open_date_ref", "st_name_df", "cntry_name_df", "city_name_df").cache()
+    df_product_category = df_latest_status.select("prd_name_df", "open_date_ref", "prd_dm_name_df", "prd_cls_name_df").cache()
 
     # Join all feature dataframes on 'prd_name' and 'open_date', ensuring all possible columns are retained
     df_final = df_basic.join(df_financial, ["prd_name_df", "open_date_ref"], "outer") \
@@ -285,6 +287,7 @@ reference_df = spark.sql("select ip_id, Segmt_Prod_Type, business_date, open_dat
 # Aggregate product features
 product_features_df = aggregate_product_features(spark, df, reference_df)
 product_features_df.show()
+
 
 
 
