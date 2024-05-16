@@ -137,7 +137,7 @@ product_features_df.show()
 
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, lit, expr, countDistinct, sum, avg, stddev, min, max, month, year, dayofweek, when
+from pyspark.sql.functions import col, expr, countDistinct, sum, avg, stddev, min, max, month, year, dayofweek, when
 from pyspark.sql.window import Window
 
 # Create Spark session
@@ -156,8 +156,7 @@ def filter_data_by_date(df, reference_df):
 # Get latest product status for each product and reference date
 def get_latest_product_status(df):
     window_spec = Window.partitionBy("prd_name", "open_date").orderBy(col("open_date").desc())
-    df_latest = df.withColumn("row_num", expr("row_number() OVER (PARTITION BY prd_name, open_date ORDER BY open_date DESC)")) \
-                  .filter(col("row_num") == 1).drop("row_num")
+    df_latest = df.withColumn("row_num", row_number().over(window_spec)).filter(col("row_num") == 1).drop("row_num")
     return df_latest
 
 # Count users per product
@@ -278,6 +277,7 @@ reference_df = spark.sql("select ip_id, Segmt_Prod_Type, business_date, open_dat
 # Aggregate product features
 product_features_df = aggregate_product_features(spark, df, reference_df)
 product_features_df.show()
+
 
 
 
