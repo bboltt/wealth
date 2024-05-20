@@ -1,1 +1,59 @@
 
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, count, when, expr, sum, avg, max, min
+from pyspark.sql.window import Window
+
+def add_balance_stats(spark, df):
+    # Convert business_date and open_date columns to date type if they are in string format
+    df = df.withColumn("business_date", col("business_date").cast("date"))
+    df = df.withColumn("open_date", col("open_date").cast("date"))
+
+    # Define window specifications for each time range
+    windowSpec = Window.partitionBy("Segmt_Prod_Type").orderBy("business_date").rangeBetween(Window.unboundedPreceding, Window.currentRow)
+
+    # Calculate balances for past 1 month
+    df = df.withColumn("total_balance_past_1_month", sum(when(col("open_date") >= col("business_date") - expr("INTERVAL 1 MONTH"), col("balance"))).over(windowSpec))
+    df = df.withColumn("mean_balance_past_1_month", avg(when(col("open_date") >= col("business_date") - expr("INTERVAL 1 MONTH"), col("balance"))).over(windowSpec))
+    df = df.withColumn("max_balance_past_1_month", max(when(col("open_date") >= col("business_date") - expr("INTERVAL 1 MONTH"), col("balance"))).over(windowSpec))
+    df = df.withColumn("min_balance_past_1_month", min(when(col("open_date") >= col("business_date") - expr("INTERVAL 1 MONTH"), col("balance"))).over(windowSpec))
+
+    # Calculate balances for past 2 months
+    df = df.withColumn("total_balance_past_2_months", sum(when(col("open_date") >= col("business_date") - expr("INTERVAL 2 MONTHS"), col("balance"))).over(windowSpec))
+    df = df.withColumn("mean_balance_past_2_months", avg(when(col("open_date") >= col("business_date") - expr("INTERVAL 2 MONTHS"), col("balance"))).over(windowSpec))
+    df = df.withColumn("max_balance_past_2_months", max(when(col("open_date") >= col("business_date") - expr("INTERVAL 2 MONTHS"), col("balance"))).over(windowSpec))
+    df = df.withColumn("min_balance_past_2_months", min(when(col("open_date") >= col("business_date") - expr("INTERVAL 2 MONTHS"), col("balance"))).over(windowSpec))
+
+    # Calculate balances for past 6 months
+    df = df.withColumn("total_balance_past_6_months", sum(when(col("open_date") >= col("business_date") - expr("INTERVAL 6 MONTHS"), col("balance"))).over(windowSpec))
+    df = df.withColumn("mean_balance_past_6_months", avg(when(col("open_date") >= col("business_date") - expr("INTERVAL 6 MONTHS"), col("balance"))).over(windowSpec))
+    df = df.withColumn("max_balance_past_6_months", max(when(col("open_date") >= col("business_date") - expr("INTERVAL 6 MONTHS"), col("balance"))).over(windowSpec))
+    df = df.withColumn("min_balance_past_6_months", min(when(col("open_date") >= col("business_date") - expr("INTERVAL 6 MONTHS"), col("balance"))).over(windowSpec))
+
+    # Calculate balances for past 12 months
+    df = df.withColumn("total_balance_past_12_months", sum(when(col("open_date") >= col("business_date") - expr("INTERVAL 12 MONTHS"), col("balance"))).over(windowSpec))
+    df = df.withColumn("mean_balance_past_12_months", avg(when(col("open_date") >= col("business_date") - expr("INTERVAL 12 MONTHS"), col("balance"))).over(windowSpec))
+    df = df.withColumn("max_balance_past_12_months", max(when(col("open_date") >= col("business_date") - expr("INTERVAL 12 MONTHS"), col("balance"))).over(windowSpec))
+    df = df.withColumn("min_balance_past_12_months", min(when(col("open_date") >= col("business_date") - expr("INTERVAL 12 MONTHS"), col("balance"))).over(windowSpec))
+
+    return df
+
+# Example usage
+spark = SparkSession.builder.appName("RecommenderSystem").getOrCreate()
+
+data = [
+    (1, 'A', '2023-01-01', '2022-01-01', '2021-01-01', 1, 100.0),
+    (2, 'A', '2023-01-02', '2022-01-02', '2021-01-02', 1, 200.0),
+    (3, 'A', '2023-01-01', '2022-01-03', '2021-01-03', 1, 150.0),
+    (1, 'B', '2023-01-01', '2022-01-01', '2021-01-01', 1, 300.0),
+    (2, 'B', '2023-01-03', '2022-01-03', '2021-01-03', 1, 400.0)
+]
+
+columns = ['ip_id', 'Segmt_Prod_Type', 'business_date', 'open_date', 'one_year_before_open_date', 'Flag', 'balance']
+
+df = spark.createDataFrame(data, columns)
+
+# Add the balance stats columns
+df_with_balance_stats = add_balance_stats(spark, df)
+
+# Show the resulting DataFrame
+df_with_balance_stats.show()
