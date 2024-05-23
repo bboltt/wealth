@@ -1,0 +1,63 @@
+import tarfile
+import os
+import boto3
+import sagemaker
+import awswrangler as wr
+from sagemaker.tensorflow import TensorFlow
+from sagemaker.inputs import TrainingInput
+
+def make_tarfile(output_filename, source_dir):
+    with tarfile.open(output_filename, 'w:gz') as tar:
+        tar.add(source_dir, arcname=os.path.basename(source_dir))
+
+# Create tar.gz file
+file_names = ['tensorflow_train.py', 'requirements.txt']
+output_filename = 'source.tar.gz'
+with tarfile.open(output_filename, 'w:gz') as tar:
+    for filename in file_names:
+        tar.add(filename, arcname=os.path.basename(filename))
+
+# Upload to S3
+s3 = boto3.client("s3")
+bucket = "nudges-sagemaker-ds-data20240411170713612400000002"
+object_key = 'bo_yi_tensorflow/source.tar.gz'
+s3.upload_file(Filename='source.tar.gz', Bucket=bucket, Key=object_key)
+
+print(f"Execution Engine: {wr.engine.get()}")
+print(f"Memory Format: {wr.memory_format.get()}")
+
+# Setup clients
+boto_session = boto3.session.Session()
+region = boto_session.region_name
+print(region)
+
+sagemaker_session = sagemaker.Session(default_bucket=bucket)
+role = sagemaker.get_execution_role()
+print(role)
+
+default_bucket = sagemaker_session.default_bucket()
+training_instance_type = "ml.m5.24xlarge"
+training_path = f"s3://{default_bucket}/henry_prod_pipeline_test/pipeline_train_data.csv"
+train_input = TrainingInput(training_path, content_type="text/csv")
+job_name = "tensorflow-pipeline-boyi"
+dataset_location = f's3://{bucket}/boyi_data'
+
+# Define TensorFlow estimator
+estimator = TensorFlow(entry_point="tensorflow_train.py",
+                       source_dir=".",
+                       role=role,
+                       framework_version='2.10',
+                       py_version='py39',
+                       script_mode=True,
+                       instance_count=1,
+                       instance_type=training_instance_type,
+                       hyperparameters={
+                           'train_steps': 100,
+                           'hidden_units': "10 10",
+                           'data_path': f'{dataset_location}/test_10k_filtered.csv'
+                       },
+                       sagemaker_session=sagemaker_session,
+                       enable_sagemaker_metrics=True)
+
+# Start training
+estimator.fit({'train': train_input})
