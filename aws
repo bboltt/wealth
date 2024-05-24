@@ -1,63 +1,97 @@
-import tarfile
+# train.py
+import argparse
 import os
-import boto3
+import pandas as pd
+import tensorflow as tf
+from sklearn.model_selection import train_test_split
+
+def main(args):
+    # Load data
+    data = pd.read_csv(args.data_path)
+    label = data.pop('CAT_A496_i')
+    features = data
+
+    for column in features.columns:
+        if features[column].dtype == 'object':
+            features[column] = features[column].fillna('unknown')
+        else:
+            features[column] = features[column].fillna(0)
+
+    # Split the data
+    x_train, x_eval, y_train, y_eval = train_test_split(features, label, test_size=0.2, random_state=42)
+
+    # Feature columns
+    feature_columns = []
+    for column in features.columns:
+        if features[column].dtype == 'object':
+            categorical_column = tf.feature_column.categorical_column_with_vocabulary_list(
+                key=column, vocabulary_list=features[column].unique())
+            embedding_dimension = int(np.floor(len(features[column].unique()) ** 0.25))
+            embedding_column = tf.feature_column.embedding_column(categorical_column, dimension=embedding_dimension)
+            feature_columns.append(embedding_column)
+        else:
+            feature_columns.append(tf.feature_column.numeric_column(key=column))
+
+    # Create a model
+    model = tf.keras.Sequential([
+        tf.keras.layers.DenseFeatures(feature_columns=feature_columns),
+        tf.keras.layers.Dense(units=args.hidden_units[0], activation='relu'),
+        tf.keras.layers.Dense(units=args.hidden_units[1], activation='relu'),
+        tf.keras.layers.Dense(units=1, activation='sigmoid')
+    ])
+
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=[tf.keras.metrics.AUC(name='auc')])
+
+    # Train the model
+    model.fit(x_train, y_train, epochs=args.train_steps, batch_size=64)
+
+    # Evaluate the model
+    eval_result = model.evaluate(x_eval, y_eval)
+    print('\nTest set auc: {:.3f}\n'.format(eval_result[1]))
+
+    # Save the model
+    model.save(os.path.join(args.model_dir, '1'))
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--train_steps', type=int, default=1000)
+    parser.add_argument('--hidden_units', type=int, nargs='+', default=[10, 10])
+    parser.add_argument('--data_path', type=str, default=os.environ.get('SM_CHANNEL_TRAIN'))
+    parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR'))
+    args = parser.parse_args()
+    main(args)
+
+
+# notebook
 import sagemaker
-import awswrangler as wr
-from sagemaker.tensorflow import TensorFlow
+from sagemaker import get_execution_role
 from sagemaker.inputs import TrainingInput
+from sagemaker.tensorflow import TensorFlow
 
-def make_tarfile(output_filename, source_dir):
-    with tarfile.open(output_filename, 'w:gz') as tar:
-        tar.add(source_dir, arcname=os.path.basename(source_dir))
+# Setup SageMaker session
+sagemaker_session = sagemaker.Session()
+role = get_execution_role()
 
-# Create tar.gz file
-file_names = ['tensorflow_train.py', 'requirements.txt']
-output_filename = 'source.tar.gz'
-with tarfile.open(output_filename, 'w:gz') as tar:
-    for filename in file_names:
-        tar.add(filename, arcname=os.path.basename(filename))
-
-# Upload to S3
-s3 = boto3.client("s3")
 bucket = "nudges-sagemaker-ds-data20240411170713612400000002"
-object_key = 'bo_yi_tensorflow/source.tar.gz'
-s3.upload_file(Filename='source.tar.gz', Bucket=bucket, Key=object_key)
-
-print(f"Execution Engine: {wr.engine.get()}")
-print(f"Memory Format: {wr.memory_format.get()}")
-
-# Setup clients
-boto_session = boto3.session.Session()
-region = boto_session.region_name
-print(region)
-
-sagemaker_session = sagemaker.Session(default_bucket=bucket)
-role = sagemaker.get_execution_role()
-print(role)
-
-default_bucket = sagemaker_session.default_bucket()
-training_instance_type = "ml.m5.24xlarge"
-training_path = f"s3://{default_bucket}/henry_prod_pipeline_test/pipeline_train_data.csv"
+training_path = f"s3://{bucket}/henry_prod_pipeline_test/pipeline_train_data.csv"
 train_input = TrainingInput(training_path, content_type="text/csv")
-job_name = "tensorflow-pipeline-boyi"
-dataset_location = f's3://{bucket}/boyi_data'
 
 # Define TensorFlow estimator
-estimator = TensorFlow(entry_point="tensorflow_train.py",
-                       source_dir=".",
+estimator = TensorFlow(entry_point='train.py',
                        role=role,
                        framework_version='2.10',
                        py_version='py39',
-                       script_mode=True,
                        instance_count=1,
-                       instance_type=training_instance_type,
+                       instance_type='ml.m5.24xlarge',
                        hyperparameters={
-                           'train_steps': 100,
-                           'hidden_units': "10 10",
-                           'data_path': f'{dataset_location}/test_10k_filtered.csv'
+                           'train_steps': 10,
+                           'hidden_units': [10, 10],
+                           'data_path': training_path
                        },
-                       sagemaker_session=sagemaker_session,
-                       enable_sagemaker_metrics=True)
+                       sagemaker_session=sagemaker_session)
 
 # Start training
 estimator.fit({'train': train_input})
+
+
+
