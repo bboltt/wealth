@@ -1,97 +1,77 @@
 # train.py
+import tensorflow as tf
+import pandas as pd
 import argparse
 import os
-import pandas as pd
-import tensorflow as tf
-from sklearn.model_selection import train_test_split
 
-def main(args):
-    # Load data
-    data = pd.read_csv(args.data_path)
-    label = data.pop('CAT_A496_i')
-    features = data
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--epochs', type=int, default=10)
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--learning_rate', type=float, default=0.001)
+    parser.add_argument('--model_dir', type=str)
+    return parser.parse_known_args()
 
-    for column in features.columns:
-        if features[column].dtype == 'object':
-            features[column] = features[column].fillna('unknown')
-        else:
-            features[column] = features[column].fillna(0)
+def load_data(data_path):
+    df = pd.read_csv(data_path)
+    X = df[['INT_A002', 'NUM_A003', 'NUM_A004']].values
+    y = df['LABEL'].values
+    return X, y
 
-    # Split the data
-    x_train, x_eval, y_train, y_eval = train_test_split(features, label, test_size=0.2, random_state=42)
-
-    # Feature columns
-    feature_columns = []
-    for column in features.columns:
-        if features[column].dtype == 'object':
-            categorical_column = tf.feature_column.categorical_column_with_vocabulary_list(
-                key=column, vocabulary_list=features[column].unique())
-            embedding_dimension = int(np.floor(len(features[column].unique()) ** 0.25))
-            embedding_column = tf.feature_column.embedding_column(categorical_column, dimension=embedding_dimension)
-            feature_columns.append(embedding_column)
-        else:
-            feature_columns.append(tf.feature_column.numeric_column(key=column))
-
-    # Create a model
-    model = tf.keras.Sequential([
-        tf.keras.layers.DenseFeatures(feature_columns=feature_columns),
-        tf.keras.layers.Dense(units=args.hidden_units[0], activation='relu'),
-        tf.keras.layers.Dense(units=args.hidden_units[1], activation='relu'),
-        tf.keras.layers.Dense(units=1, activation='sigmoid')
+def create_model(input_shape):
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Dense(32, activation='relu', input_shape=input_shape),
+        tf.keras.layers.Dense(16, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
     ])
+    return model
 
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=[tf.keras.metrics.AUC(name='auc')])
-
-    # Train the model
-    model.fit(x_train, y_train, epochs=args.train_steps, batch_size=64)
-
-    # Evaluate the model
-    eval_result = model.evaluate(x_eval, y_eval)
-    print('\nTest set auc: {:.3f}\n'.format(eval_result[1]))
-
-    # Save the model
-    model.save(os.path.join(args.model_dir, '1'))
+def main():
+    args, _ = parse_args()
+    
+    data_path = '/opt/ml/input/data/training/mini.csv'
+    X, y = load_data(data_path)
+    
+    model = create_model((X.shape[1],))
+    
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=args.learning_rate),
+                  loss='binary_crossentropy',
+                  metrics=['accuracy'])
+    
+    model.fit(X, y, epochs=args.epochs, batch_size=args.batch_size)
+    
+    model.save(os.path.join(args.model_dir, 'model'))
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--train_steps', type=int, default=1000)
-    parser.add_argument('--hidden_units', type=int, nargs='+', default=[10, 10])
-    parser.add_argument('--data_path', type=str, default=os.environ.get('SM_CHANNEL_TRAIN'))
-    parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR'))
-    args = parser.parse_args()
-    main(args)
+    main()
+
 
 
 # notebook
 import sagemaker
-from sagemaker import get_execution_role
-from sagemaker.inputs import TrainingInput
 from sagemaker.tensorflow import TensorFlow
 
-# Setup SageMaker session
-sagemaker_session = sagemaker.Session()
-role = get_execution_role()
+s3_bucket = 'fraud-sagemaker-ds-data20240212202305186200000001'
+s3_data_path = f's3://{s3_bucket}/bo_yi_tensorflow/data/mini.csv'
 
-bucket = "nudges-sagemaker-ds-data20240411170713612400000002"
-training_path = f"s3://{bucket}/henry_prod_pipeline_test/pipeline_train_data.csv"
-train_input = TrainingInput(training_path, content_type="text/csv")
+role = sagemaker.get_execution_role()
+session = sagemaker.Session()
 
-# Define TensorFlow estimator
 estimator = TensorFlow(entry_point='train.py',
                        role=role,
-                       framework_version='2.10',
-                       py_version='py39',
                        instance_count=1,
-                       instance_type='ml.m5.24xlarge',
+                       instance_type='ml.m5.large',
+                       framework_version='2.4.1',
+                       py_version='py39',
                        hyperparameters={
-                           'train_steps': 10,
-                           'hidden_units': [10, 10],
-                           'data_path': training_path
-                       },
-                       sagemaker_session=sagemaker_session)
+                           'epochs': 10,
+                           'batch_size': 32,
+                           'learning_rate': 0.001
+                       })
 
-# Start training
-estimator.fit({'train': train_input})
+# Start the training job
+estimator.fit({'training': s3_data_path})
+
 
 
 
