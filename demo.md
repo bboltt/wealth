@@ -1,3 +1,46 @@
+### Slide 5: Introduction to DeepFM Model
+
+**DeepFM Overview:**
+- **DeepFM (Deep Factorization Machine):**
+  - Combines Factorization Machines (FM) and Deep Neural Networks (DNN).
+  - Efficiently handles both sparse (categorical) and dense (numerical) features.
+  - Captures both low-order and high-order feature interactions.
+
+**Key Components:**
+1. **Factorization Machine (FM):**
+   - Captures **low-order feature interactions**.
+   - Efficiently handles sparse data by embedding features into dense vectors.
+   - Useful for identifying simple relationships between features.
+
+2. **Deep Neural Network (DNN):**
+   - Captures **high-order feature interactions**.
+   - Multiple layers of neurons allow for complex pattern recognition.
+   - Enhances the model's ability to understand intricate data relationships.
+
+**Why DeepFM?**
+- **Comprehensive Feature Interaction:**
+  - FM component captures linear and pairwise interactions.
+  - DNN component captures complex, non-linear interactions.
+- **Improved Accuracy:**
+  - By combining FM and DNN, DeepFM leverages the strengths of both methods.
+  - Results in more accurate and robust predictions.
+
+**Business Impact:**
+- **Better Customer Prospecting:**
+  - Enhanced ability to identify potential PWM customers through improved prediction accuracy.
+- **Scalable and Efficient:**
+  - Capable of handling large datasets with high-dimensional features.
+- **Versatile Applications:**
+  - Can be applied to various recommendation and prediction tasks beyond customer prospecting.
+
+---
+
+This slide introduces the DeepFM model, highlighting its components, advantages, and potential business impacts.
+
+
+
+
+
 ### Slide 6: Model Pipeline Overview
 
 **Pipeline Overview:**
