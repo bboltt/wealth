@@ -1,42 +1,53 @@
-### Slide 5: Introduction to DeepFM Model
+### Slide 6: Model Training and Evaluation Workflow
 
-**DeepFM Overview:**
-- **DeepFM (Deep Factorization Machine):**
-  - Combines Factorization Machines (FM) and Deep Neural Networks (DNN).
-  - Efficiently handles both sparse (categorical) and dense (numerical) features.
-  - Captures both low-order and high-order feature interactions.
+**Workflow Overview:**
 
-**Key Components:**
-1. **Factorization Machine (FM):**
-   - Captures **low-order feature interactions**.
-   - Efficiently handles sparse data by embedding features into dense vectors.
-   - Useful for identifying simple relationships between features.
+1. **Data Labeling:**
+   - **Positive Labels (1):** Records where a client opened a product.
+   - **Negative Labels (0):** Client-product pairs that were never opened in the target period.
 
-2. **Deep Neural Network (DNN):**
-   - Captures **high-order feature interactions**.
-   - Multiple layers of neurons allow for complex pattern recognition.
-   - Enhances the model's ability to understand intricate data relationships.
+2. **Handling Data Imbalance:**
+   - **Stratified Subsampling:**
+     - Balance the data by subsampling the negative labels (0) to match the distribution of positive labels (1).
 
-**Why DeepFM?**
-- **Comprehensive Feature Interaction:**
-  - FM component captures linear and pairwise interactions.
-  - DNN component captures complex, non-linear interactions.
-- **Improved Accuracy:**
-  - By combining FM and DNN, DeepFM leverages the strengths of both methods.
-  - Results in more accurate and robust predictions.
+3. **Data Preprocessing:**
+   - **Feature Handling:**
+     - Drop unnecessary columns: `business_date`, `open_date`, `one_year_before_open_date`.
+     - Identify and process:
+       - **Sparse Features:** Categorical features (e.g., `ip_id`, `Segmt_Prod_Type`).
+       - **Dense Features:** Numerical features.
+   - **Encoding and Scaling:**
+     - Encode sparse features using `OrdinalEncoder`.
+     - Scale dense features using `MinMaxScaler`.
+     - Generate additional features: `duplicate_ip_id`, `duplicate_Segmt_Prod_Type`.
 
-**Business Impact:**
-- **Better Customer Prospecting:**
-  - Enhanced ability to identify potential PWM customers through improved prediction accuracy.
-- **Scalable and Efficient:**
-  - Capable of handling large datasets with high-dimensional features.
-- **Versatile Applications:**
-  - Can be applied to various recommendation and prediction tasks beyond customer prospecting.
+4. **Model Training:**
+   - Split the preprocessed data into training and validation sets.
+   - Define feature columns:
+     - **Sparse Features:** Use `SparseFeat` with embedding dimensions to capture feature interactions.
+     - **Dense Features:** Use `DenseFeat`.
+   - Build and compile the DeepFM model using defined feature columns.
+     - **Embedding Layers:** Transform sparse features into dense vectors to capture interactions.
+   - Train the model with the training data.
+
+5. **Model Evaluation:**
+   - Evaluate model performance on both training and validation sets using out-of-sample data.
+   - **Metrics Used:**
+     - **AUC (Area Under the Curve):** Measures the ability of the model to distinguish between classes.
+     - **Lift Score:** Measures the effectiveness of the model in ranking positive instances higher.
+
+**Visualization:**
+
+![Model Pipeline Flow](https://yourimageurl.com/pipeline_flow.png) *(Replace with actual pipeline diagram image)*
+
+**Key Benefits:**
+- **Embeddings:** Efficiently capture feature interactions, enhancing model performance.
+- **Stratified Subsampling:** Ensure balanced data for training, improving model robustness.
+- **Accurate Predictions:** Enhanced product recommendations with precise targeting.
 
 ---
 
-This slide introduces the DeepFM model, highlighting its components, advantages, and potential business impacts.
-
+This slide provides a clear and detailed overview of your specific model training and evaluation workflow, including how you handle data imbalance and the metrics used for evaluation.
 
 
 
