@@ -1,109 +1,47 @@
-### Slide 6: Model Training and Evaluation Workflow
+"Good [morning/afternoon], everyone. Thank you for joining me today. I’m excited to share our new product recommender model with you. Let’s start by discussing the core challenge we faced: developing a generalized recommendation system that can learn complex, many-to-many relationships between users and items. This task is particularly challenging because it involves understanding and predicting user preferences across a wide range of products.
 
-**Workflow Overview:**
+To tackle this, we chose the DeepFM algorithm, which stands for Deep Factorization Machine. Now, you might be wondering, why did we choose DeepFM?
 
-1. **Data Labeling:**
-   - **Positive Labels (1):** Records where a client opened a product.
-   - **Negative Labels (0):** Client-product pairs that were never opened in the target period.
+First, let’s talk about feature interaction. The DeepFM algorithm combines two powerful components:
 
-2. **Handling Data Imbalance:**
-   - **Stratified Subsampling:**
-     - Balance the data by subsampling the negative labels (0) to match the distribution of positive labels (1).
+The Factorization Machine (FM) component handles linear and pairwise interactions efficiently. For example, it can identify simple relationships between features like a product being frequently opened by a certain user segment.
+The Deep Neural Network (DNN) component captures more complex, non-linear interactions. This means it can understand deeper relationships in the data that might not be immediately obvious. DNN is a part of deep learning, which is a very powerful technique. Most modern AI applications, from image recognition to natural language processing, use deep learning because of its ability to handle complex patterns and large amounts of data.
+Second, combining FM and DNN components results in improved accuracy. DeepFM leverages the strengths of both methods, leading to more accurate and robust predictions. This combination is key to enhancing the model's performance in identifying the best product recommendations for our clients.
 
-3. **Data Preprocessing:**
-   - **Feature Handling:**
-     - Drop unnecessary columns: `business_date`, `open_date`, `one_year_before_open_date`.
-     - Identify and process:
-       - **Sparse Features:** Categorical features (e.g., `ip_id`, `Segmt_Prod_Type`).
-       - **Dense Features:** Numerical features.
-   - **Encoding and Scaling:**
-     - Encode sparse features using `OrdinalEncoder`.
-     - Scale dense features using `MinMaxScaler`.
-     - Generate additional features: `duplicate_ip_id`, `duplicate_Segmt_Prod_Type`.
+Business Impact:
 
-4. **Model Training:**
-   - Split the preprocessed data into training and validation sets.
-   - Define feature columns:
-     - **Sparse Features:** Use `SparseFeat` with embedding dimensions to capture feature interactions.
-     - **Dense Features:** Use `DenseFeat`.
-   - Build and compile the DeepFM model using defined feature columns.
-     - **Embedding Layers:** Transform sparse features into dense vectors to capture interactions.
-   - Train the model with the training data.
+Better Product Prediction: Our model is now more adept at identifying potential products for each client with improved accuracy, which directly translates to better service and satisfaction for our clients.
+Scalable and Efficient: The model is capable of handling large datasets with many features. This scalability ensures that as our data grows, the model remains effective and efficient."
+Slide 2: Target Definition
+"Our target is to scan the entire product span of our Private Wealth portfolio and group similar products into types that make sense for our business objectives. The product categorization was provided by our business team, and we identified 28 distinct product types.
 
-5. **Model Evaluation:**
-   - Evaluate model performance on both training and validation sets using out-of-sample data.
-   - **Metrics Used:**
-     - **AUC (Area Under the Curve):** Measures the ability of the model to distinguish between classes.
-     - **Lift Score:** Measures the effectiveness of the model in ranking positive instances higher.
+This table here shows the diversity of products, ranging from various types of checking accounts to different loan products. By categorizing products in this way, we ensure our model can provide precise recommendations tailored to specific client needs.
 
-**Visualization:**
+For instance, our categories include different deposit products like money market accounts and various checking account types. On the loan side, we have products like home equity lines of credit (HELOCs) and mortgages. This categorization helps us better understand the product landscape and predict which products will be most relevant to each client."
 
-![Model Pipeline Flow](https://yourimageurl.com/pipeline_flow.png) *(Replace with actual pipeline diagram image)*
+Slide 3: Feature Selection and Engineering
+"In feature selection and engineering, our goal is to capture the interaction between client features and product features. We use approximately 130 features to learn about client preferences effectively.
 
-**Key Benefits:**
-- **Embeddings:** Efficiently capture feature interactions, enhancing model performance.
-- **Stratified Subsampling:** Ensure balanced data for training, improving model robustness.
-- **Accurate Predictions:** Enhanced product recommendations with precise targeting.
+Client Features:
 
----
+Demographic Information: For example, if a customer’s income is above $500,000, it can influence their product preferences.
+Bureau Debt: This includes the applicant’s total debt service ratio from the credit bureau, which helps us understand their financial behavior.
+Revenue: We look at the variance in revenue for a product over the past three months to gauge its stability and attractiveness.
+Balance: We consider the percentage difference between recent three-month average balance and the previous three months’ average balance to understand changes in financial behavior.
+Product Distribution: For instance, the number of active ROTH IRA clients gives us insight into the popularity and reach of certain products.
+Product Features:
 
-This slide provides a clear and detailed overview of your specific model training and evaluation workflow, including how you handle data imbalance and the metrics used for evaluation.
+Product Balance: This is the mean balance of the product over the last 12 months, helping us gauge its performance.
+Client Distribution: We look at the number of clients who opened a particular product in the last six months to understand its recent demand.
+By considering these features, our model can make more informed predictions about which products are likely to interest each client."
 
+Slide 4: Data Sourcing
+"Finally, let’s talk about data sourcing. To build our model, we pull data from several comprehensive sources. Each source provides different types of information that are crucial for our model’s accuracy.
 
+For example:
 
-
-### Slide 6: Model Pipeline Overview
-
-**Pipeline Overview:**
-
-1. **Data Collection:**
-   - Extract data from:
-     - Training table: `sb_dsp.recommendation_train_data_v2`
-     - Validation table: `sb_dsp.recommendation_validation_data_v1`
-
-2. **Data Preprocessing:**
-   - **Subsampling:**
-     - Use stratified subsampling to balance the data with specified zero ratios and seeds.
-   - **Feature Handling:**
-     - Drop unnecessary columns: `business_date`, `open_date`, `one_year_before_open_date`.
-     - Identify and process:
-       - **Sparse Features:** Categorical features (including `ip_id` and other string columns).
-       - **Dense Features:** Numerical features.
-
-3. **Feature Engineering:**
-   - Encode sparse features using `OrdinalEncoder`.
-   - Scale dense features using `MinMaxScaler`.
-   - Generate additional features: `duplicate_ip_id`, `duplicate_Segmt_Prod_Type`.
-
-4. **Model Training:**
-   - Split the preprocessed data into training and validation sets.
-   - Define feature columns:
-     - **Sparse Features:** Use `SparseFeat` with embedding dimensions to capture feature interactions.
-     - **Dense Features:** Use `DenseFeat`.
-   - Build and compile the DeepFM model using defined feature columns.
-     - **Embedding Layers:** Transform sparse features into dense vectors to capture interactions.
-   - Train the model with the training data.
-
-5. **Model Evaluation:**
-   - Evaluate model performance on both training and validation sets.
-   - Calculate evaluation metrics: Log Loss, ROC-AUC Score.
-   - Generate product-level performance summaries.
-
-6. **Testing on New Data:**
-   - Apply the trained model to new validation data (`sb_dsp.recommendation_validation_data_v1`).
-   - Process new data using the same encoding and scaling techniques.
-   - Evaluate and summarize model performance on new data.
-
-**Visualization:**
-
-![Model Pipeline Flow](https://yourimageurl.com/pipeline_flow.png) *(Replace with actual pipeline diagram image)*
-
-**Key Benefits:**
-- **Embeddings:** Efficiently capture feature interactions, enhancing model performance.
-- **Sparse and Dense Feature Handling:** Robustly manage different data types.
-- **Stratified Subsampling:** Ensure balanced data for training, improving model robustness.
-- **Accurate Predictions:** Enhance customer prospecting with precise targeting.
-
----
-
-This slide provides a clear and detailed overview of your specific model pipeline based on the code you provided, including the role of embeddings in the DeepFM model.
+From PW R360, we get data on balance, revenue, product distribution, and product information. This gives us a complete financial picture of each client.
+The Credit Risk data source includes information on risk levels, account maturity dates, and financial portfolios, including assets and liabilities. This helps us understand the financial health and risk profile of our clients.
+Trust data includes daily transactions and fees, as well as the monthly market value of trust accounts. This is essential for understanding the performance and management of trust accounts.
+Loan Origination provides client application history and debt information, giving us insight into clients’ borrowing behaviors and creditworthiness.
+By integrating data from these diverse sources, our model has a robust foundation, allowing it to make well-informed recommendations. This comprehensive approach ensures we understand our clients from multiple dimensions, enabling us to serve them better."
