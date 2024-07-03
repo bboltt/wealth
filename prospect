@@ -1,0 +1,50 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, lag, lit, when
+from pyspark.sql.window import Window
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("GroundTruthExample").getOrCreate()
+
+# Example DataFrame with relevant columns
+data = [
+    (1, "PWM", "2023-01-01"),
+    (1, "NON_PWM", "2023-02-01"),
+    (1, "PWM", "2023-03-01"),
+    (2, "NON_PWM", "2023-01-01"),
+    (2, "NON_PWM", "2023-02-01"),
+    (2, "PWM", "2023-03-01"),
+    (3, "PWM", "2023-01-01"),
+    (3, "PWM", "2023-02-01"),
+    (3, "PWM", "2023-03-01"),
+    (4, "NON_PWM", "2023-01-01"),
+    (4, "NON_PWM", "2023-02-01"),
+    (4, "NON_PWM", "2023-03-01")
+]
+
+columns = ["hh_id_in_wh", "seg_code", "business_date"]
+
+df = spark.createDataFrame(data, columns)
+
+# Reference date and target period
+reference_date = "2023-01-01"
+target_period_start = reference_date
+target_period_end = "2023-07-01"  # 6 months after the reference date
+
+# Filter data for the target period
+df = df.filter((col("business_date") >= lit(target_period_start)) & (col("business_date") < lit(target_period_end)))
+
+# Window specification to look at the previous segment code
+window_spec = Window.partitionBy("hh_id_in_wh").orderBy("business_date")
+
+# Identify switches from NON_PWM to PWM
+df = df.withColumn("prev_seg_code", lag("seg_code").over(window_spec))
+df = df.withColumn("switched_to_pwm", when((col("prev_seg_code") != "PWM") & (col("seg_code") == "PWM"), 1).otherwise(0))
+
+# Select distinct hh_id_in_wh that switched to PWM
+ground_truth = df.filter(col("switched_to_pwm") == 1).select("hh_id_in_wh").distinct()
+
+# Show the ground truth
+ground_truth.show()
+
+# Stop Spark session
+spark.stop()
