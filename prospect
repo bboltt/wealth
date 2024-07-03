@@ -309,3 +309,114 @@ class FeatureEngineeringPipeline:
         # TODO: Include calls to new engineering methods
         return self.hh_features
 
+
+
+
+### High-Level Summary of Progress
+
+#### Project Overview
+The objective of this project is to identify potential new consumers for Private Wealth Management (PWM) services. To achieve this, we've implemented a robust feature engineering pipeline that processes and enhances the data, ensuring each household (`hh_id_in_wh`) is represented by a comprehensive set of features. These features provide valuable insights into consumer behavior, financial activities, and product usage, which are crucial for predicting PWM prospects.
+
+#### Key Achievements
+1. **Data Loading and Preprocessing**: 
+   - Successfully loaded and preprocessed data from `dm_r3.pwm_mstr_dtl_daily`.
+   - Ensured dates and necessary fields are correctly formatted and standardized.
+
+2. **Feature Engineering Pipeline**:
+   - Developed a feature engineering pipeline that creates a diverse set of features from the data.
+   - Standardized product names using a mapping file to ensure consistency in product categories.
+
+3. **Comprehensive Feature Set**:
+   - Implemented over 100 features that capture various aspects of household financial behavior, transaction history, product usage, and geographic information.
+
+4. **Ground Truth and Model Evaluation**:
+   - Defined the ground truth for model evaluation by identifying households that switched to PWM within a specific target period.
+   - Implemented a method to evaluate the model's accuracy using precision and recall metrics.
+
+#### Model Evaluation Results
+- **Precision**: 0.47
+- **Recall**: 0.02
+
+**What This Means:**
+- **Precision of 0.47**: This indicates that 47% of the households identified by our model as potential PWM clients were indeed correct. This is a relatively high precision, suggesting that when our model makes a positive prediction, it is often correct.
+- **Recall of 0.02**: This indicates that our model was able to identify only 2% of the actual PWM clients from the ground truth. This low recall suggests that while our model is good at making accurate predictions (as indicated by the precision), it is not identifying a large portion of the potential PWM clients.
+
+### List of Features and Descriptions
+
+| Feature Name                | Description                                                                         |
+|-----------------------------|-------------------------------------------------------------------------------------|
+| hh_longevity                | Number of days since the first account was opened by the household.                  |
+| curr_bal_amt                | Current balance amount in the latest record.                                         |
+| curr_ledger_bal_amt         | Current ledger balance amount in the latest record.                                  |
+| bal_amt_mean                | Mean of current balance amounts.                                                     |
+| bal_amt_max                 | Maximum current balance amount.                                                     |
+| bal_amt_min                 | Minimum current balance amount.                                                     |
+| bal_amt_std                 | Standard deviation of current balance amounts.                                       |
+| ledger_bal_amt_mean         | Mean of ledger balance amounts.                                                      |
+| ledger_bal_amt_std          | Standard deviation of ledger balance amounts.                                        |
+| ledger_bal_amt_max          | Maximum ledger balance amount.                                                       |
+| ledger_bal_amt_min          | Minimum ledger balance amount.                                                       |
+| product_diversity           | Count of distinct products used by the household.                                    |
+| transaction_count           | Total number of transactions by the household.                                       |
+| transaction_recency         | Number of days since the last transaction.                                           |
+| state_count                 | Count of distinct states associated with the household.                              |
+| country_count               | Count of distinct countries associated with the household.                           |
+| account_type_count          | Count of distinct account types held by the household.                               |
+| transaction_frequency       | Average number of transactions per month.                                            |
+| balance_trend               | Trend in balance amounts over time (linear regression slope).                        |
+| recent_activity_1m          | Number of transactions in the last month.                                            |
+| recent_product_diversity_3m | Count of distinct products used in the last 3 months.                                |
+| moving_avg_bal              | Moving average of balance amounts over the last 3 transactions.                      |
+| total_bal_amt               | Total balance amount across all transactions.                                        |
+| bal_amt_variance            | Variance of balance amounts.                                                         |
+| rolling_std_bal             | Rolling standard deviation of balance amounts over the last 3 transactions.          |
+| standardized_prd_name_*     | One-hot encoded columns indicating the presence of specific standardized products.   |
+
+Each `standardized_prd_name_*` column represents a different product type, with a value of 1 indicating the household has used the product, and 0 otherwise.
+
+### Next Steps
+
+1. **Model Improvement**:
+   - Improve the recall while maintaining or improving the precision by exploring additional features, tuning the model, and trying different algorithms.
+   - Address data imbalance issues by applying techniques such as oversampling, undersampling, or using advanced methods like SMOTE.
+
+2. **Iterative Feature Engineering**:
+   - Continuously refine the feature engineering process based on model performance and feedback.
+   - Explore additional data sources and feature creation techniques to enhance model accuracy.
+
+3. **Deployment and Monitoring**:
+   - Deploy the predictive model into production to identify potential PWM clients in real-time.
+   - Implement monitoring and maintenance processes to ensure the model remains effective over time.
+
+This comprehensive feature engineering pipeline and the ensuing model will enable us to accurately identify and target new potential PWM clients, driving growth and enhancing our customer acquisition strategies. Despite the current low recall, the high precision indicates that our model is a strong starting point for further refinement and improvement.
+
+
+
+
+Feature Name	Description
+hh_longevity	Number of days since the first account was opened by the household.
+curr_bal_amt	Current balance amount in the latest record.
+curr_ledger_bal_amt	Current ledger balance amount in the latest record.
+bal_amt_mean	Mean of current balance amounts.
+bal_amt_max	Maximum current balance amount.
+bal_amt_min	Minimum current balance amount.
+bal_amt_std	Standard deviation of current balance amounts.
+ledger_bal_amt_mean	Mean of ledger balance amounts.
+ledger_bal_amt_std	Standard deviation of ledger balance amounts.
+ledger_bal_amt_max	Maximum ledger balance amount.
+ledger_bal_amt_min	Minimum ledger balance amount.
+product_diversity	Count of distinct products used by the household.
+transaction_count	Total number of transactions by the household.
+transaction_recency	Number of days since the last transaction.
+state_count	Count of distinct states associated with the household.
+country_count	Count of distinct countries associated with the household.
+account_type_count	Count of distinct account types held by the household.
+transaction_frequency	Average number of transactions per month.
+balance_trend	Trend in balance amounts over time (linear regression slope).
+recent_activity_1m	Number of transactions in the last month.
+recent_product_diversity_3m	Count of distinct products used in the last 3 months.
+moving_avg_bal	Moving average of balance amounts over the last 3 transactions.
+total_bal_amt	Total balance amount across all transactions.
+bal_amt_variance	Variance of balance amounts.
+rolling_std_bal	Rolling standard deviation of balance amounts over the last 3 transactions.
+standardized_prd_name_*	One-hot encoded columns indicating the presence of specific standardized products.
