@@ -48,3 +48,21 @@ ground_truth.show()
 
 # Stop Spark session
 spark.stop()
+
+
+
+# Assuming ground_truth and top_k_consumers DataFrames have been defined
+ground_truth_set = set(row.hh_id_in_wh for row in ground_truth.collect())
+top_k_consumers_set = set(row.hh_id_in_wh for row in top_k_consumers.collect())
+
+# Calculate True Positives, False Positives, and False Negatives
+true_positives = ground_truth_set.intersection(top_k_consumers_set)
+false_positives = top_k_consumers_set - ground_truth_set
+false_negatives = ground_truth_set - top_k_consumers_set
+
+# Calculate Precision and Recall
+precision = len(true_positives) / (len(true_positives) + len(false_positives)) if (len(true_positives) + len(false_positives)) > 0 else 0
+recall = len(true_positives) / (len(true_positives) + len(false_negatives)) if (len(true_positives) + len(false_negatives)) > 0 else 0
+
+print(f"Precision: {precision}")
+print(f"Recall: {recall}")
