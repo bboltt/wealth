@@ -1,0 +1,17 @@
+Over the past month, I’ve focused on several areas of our PWM consummer prospecting project.
+
+We have developed and implemented a feature engineering pipeline. This pipeline creates household level features, providing insights into household financial behavior, balance history, product usage, and other information.
+
+With these features in place, we completed the unsupervised learning model pipeline. This involved clustering existing PWM clients and calculating the similarity of all consumers to these clusters.
+
+In terms of model evaluation, I initially defined the ground truth by identifying all new PWM clients within a target period. However, I just realized that this approach was flawed because some new PWM clients were not our historical consumers. Therefore, the correct approach is to use only those new PWM clients who were historical consumers as our ground truth.
+
+Our current focus areas are:
+
+Exploring additional features, tuning the model, and experimenting with different algorithms.
+Addressing the data imbalance challenge by looking into techniques like oversampling, undersampling, and advanced methods such as SMOTE.
+
+Performing EDA on clients who switched from non-PWM to PWM to identify common characteristics.
+Ensuring these identified characteristics are included in our features to improve model's effectiveness.
+
+
