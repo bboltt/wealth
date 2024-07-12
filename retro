@@ -16,3 +16,11 @@ Ensuring these identified characteristics are included in our features to improv
 
 One significant roadblock we’ve encountered is related to defining the ground truth. Currently, our data allows us to see which clients naturally transitioned from non-PWM to PWM. However, what we really need is data on clients who were approached by Relationship Managers (RMs) and their subsequent feedback, whether they accepted or rejected the PWM offer. This feedback would provide a more solid target for our model
 
+Define the Hyperparameter Grid:
+
+Create a dictionary where each key is a hyperparameter name and the value is a list of possible values.
+Iterate Over the Grid:
+
+Use nested loops to iterate over all combinations of hyperparameters.
+Train and evaluate the model for each combination.
+Keep track of the best performing set of hyperparameters.
