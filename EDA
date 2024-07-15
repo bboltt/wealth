@@ -1,0 +1,154 @@
+# Importing necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, to_date, lag, max as spark_max, count, when, date_add, lit
+from pyspark.sql.window import Window
+
+# Initializing Spark session
+spark = SparkSession.builder.appName("EDA_NonPWM_to_PWM").getOrCreate()
+
+# Load data
+df = spark.read.csv("path_to_your_data.csv", header=True, inferSchema=True)
+
+# Convert date columns to date type
+df = df.withColumn("business_date", to_date(col("business_date"), "yyyy-MM-dd"))
+df = df.withColumn("open_date", to_date(col("open_date"), "yyyy-MM-dd"))
+df = df.withColumn("close_date", to_date(col("close_date"), "yyyy-MM-dd"))
+
+# Set the reference date
+reference_date = "2023-12-31"
+reference_date_col = to_date(lit(reference_date), "yyyy-MM-dd")
+
+# Define the time windows
+past_6_months_start = date_add(reference_date_col, -180)
+future_6_months_end = date_add(reference_date_col, 180)
+
+# Filter for relevant dates
+df = df.filter((col("business_date") <= future_6_months_end) & (col("business_date") >= past_6_months_start))
+
+# Determine if the consumer was non-PWM for the entire past 6 months
+windowSpec = Window.partitionBy("hh_id_in_wh").orderBy(col("business_date"))
+df = df.withColumn("prev_seg_code", lag("seg_code").over(windowSpec))
+
+# Identify consumers constantly non-PWM in the past 6 months
+non_pwm_past = df.filter((col("business_date") <= reference_date_col) & (col("business_date") >= past_6_months_start) & (col("seg_code") != "PWM")) \
+    .groupBy("hh_id_in_wh").agg(count("seg_code").alias("non_pwm_count"))
+
+# Ensure the consumer has records for the full 6 months (180 days)
+non_pwm_past = non_pwm_past.filter(col("non_pwm_count") == 180)
+
+# Identify consumers who switch to PWM in the future 6 months
+switch_to_pwm_future = df.filter((col("business_date") > reference_date_col) & (col("business_date") <= future_6_months_end) & (col("seg_code") == "PWM")) \
+    .select("hh_id_in_wh").distinct()
+
+# Valid switches are those who are non-PWM in the past 6 months and switch to PWM in the future 6 months
+valid_switches = non_pwm_past.join(switch_to_pwm_future, "hh_id_in_wh", "inner")
+
+# Extract the necessary data for analysis
+df_switch = df.join(valid_switches, "hh_id_in_wh", "inner").filter(col("business_date") > reference_date_col)
+df_switch_pd = df_switch.toPandas()
+
+# Overview of the data
+print("Data Overview:")
+print(df_switch_pd.info())
+print(df_switch_pd.describe())
+
+# Plotting distribution of account longevity
+plt.figure(figsize=(10, 6))
+sns.histplot(df_switch_pd['account_longevity'], bins=30, kde=True)
+plt.title("Distribution of Account Longevity")
+plt.xlabel("Account Longevity (days)")
+plt.ylabel("Frequency")
+plt.show()
+
+# Balance features analysis
+plt.figure(figsize=(10, 6))
+sns.boxplot(data=df_switch_pd[['curr_bal_amt', 'ledger_bal_amt']])
+plt.title("Boxplot of Current Balance and Ledger Balance Amounts")
+plt.ylabel("Balance Amount")
+plt.show()
+
+# Product diversity analysis
+plt.figure(figsize=(10, 6))
+sns.histplot(df_switch_pd['product_diversity'], bins=30, kde=True)
+plt.title("Distribution of Product Diversity")
+plt.xlabel("Number of Distinct Products Used")
+plt.ylabel("Frequency")
+plt.show()
+
+# Transaction count analysis
+plt.figure(figsize=(10, 6))
+sns.histplot(df_switch_pd['transaction_count'], bins=30, kde=True)
+plt.title("Distribution of Transaction Count")
+plt.xlabel("Transaction Count")
+plt.ylabel("Frequency")
+plt.show()
+
+# Analyzing recent activity
+plt.figure(figsize=(10, 6))
+sns.histplot(df_switch_pd['recent_activity_1m'], bins=30, kde=True)
+plt.title("Distribution of Recent Activity (Last Month)")
+plt.xlabel("Number of Transactions in Last Month")
+plt.ylabel("Frequency")
+plt.show()
+
+# Geographic features analysis
+state_count_df = df_switch_pd['state_count'].value_counts().reset_index()
+state_count_df.columns = ['state_count', 'frequency']
+plt.figure(figsize=(10, 6))
+sns.barplot(data=state_count_df, x='state_count', y='frequency')
+plt.title("Distribution of State Count")
+plt.xlabel("Number of States")
+plt.ylabel("Frequency")
+plt.show()
+
+country_count_df = df_switch_pd['country_count'].value_counts().reset_index()
+country_count_df.columns = ['country_count', 'frequency']
+plt.figure(figsize=(10, 6))
+sns.barplot(data=country_count_df, x='country_count', y='frequency')
+plt.title("Distribution of Country Count")
+plt.xlabel("Number of Countries")
+plt.ylabel("Frequency")
+plt.show()
+
+# Analyzing one-hot encoded product features
+onehot_cols = [col for col in df_switch_pd.columns if 'standardized_prd_name_' in col]
+onehot_summary = df_switch_pd[onehot_cols].sum().reset_index()
+onehot_summary.columns = ['Product', 'Count']
+onehot_summary = onehot_summary.sort_values(by='Count', ascending=False)
+
+plt.figure(figsize=(12, 8))
+sns.barplot(data=onehot_summary, x='Count', y='Product')
+plt.title("One-Hot Encoded Product Features")
+plt.xlabel("Count")
+plt.ylabel("Product")
+plt.show()
+
+# Correlation matrix
+plt.figure(figsize=(12, 8))
+correlation_matrix = df_switch_pd.corr()
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
+plt.title("Correlation Matrix")
+plt.show()
+
+# Summary of findings
+summary = {
+    "Account Longevity": df_switch_pd['account_longevity'].describe(),
+    "Current Balance Amount": df_switch_pd['curr_bal_amt'].describe(),
+    "Ledger Balance Amount": df_switch_pd['ledger_bal_amt'].describe(),
+    "Product Diversity": df_switch_pd['product_diversity'].describe(),
+    "Transaction Count": df_switch_pd['transaction_count'].describe(),
+    "Recent Activity (Last Month)": df_switch_pd['recent_activity_1m'].describe(),
+    "State Count": state_count_df,
+    "Country Count": country_count_df,
+    "Top Products Used": onehot_summary
+}
+
+for key, value in summary.items():
+    print(f"{key}:\n{value}\n")
+
+# Closing Spark session
+spark.stop()
