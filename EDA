@@ -154,14 +154,14 @@ for key, value in summary.items():
 spark.stop()
 
 
-
 # Determine if the consumer was non-PWM for at least 6 months
 windowSpec = Window.partitionBy("hh_id_in_wh").orderBy(col("business_date"))
 df = df.withColumn("prev_seg_code", lag("seg_code").over(windowSpec))
 
 # Identify consumers constantly non-PWM for at least 6 months
-non_pwm_consistent = df.filter(col("seg_code") != "PWM").withColumn("rn", row_number().over(windowSpec))
-non_pwm_consistent = non_pwm_consistent.groupBy("hh_id_in_wh").agg(
+# Here, we're calculating the duration for each hh_id_in_wh group
+# We'll filter out rows where the consumer is non-PWM for at least 6 months
+non_pwm_consistent = df.filter(col("seg_code") != "PWM").groupBy("hh_id_in_wh").agg(
     (datediff(spark_max("business_date"), min("business_date"))).alias("non_pwm_duration"),
     count("seg_code").alias("non_pwm_count"),
     spark_max("business_date").alias("last_non_pwm_date")
@@ -174,3 +174,4 @@ non_pwm_consistent = non_pwm_consistent.filter((col("non_pwm_duration") >= 180) 
 switch_to_pwm = df.filter(col("seg_code") == "PWM").select("hh_id_in_wh", "business_date").distinct()
 valid_switches = non_pwm_consistent.join(switch_to_pwm, "hh_id_in_wh", "inner") \
     .filter(col("business_date") > col("last_non_pwm_date")).select("hh_id_in_wh").distinct()
+
