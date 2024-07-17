@@ -155,8 +155,6 @@ spark.stop()
 
 
 
-
-
 # Determine if the consumer was non-PWM for at least 6 months
 windowSpec = Window.partitionBy("hh_id_in_wh").orderBy(col("business_date"))
 df = df.withColumn("prev_seg_code", lag("seg_code").over(windowSpec))
