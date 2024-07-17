@@ -222,3 +222,215 @@ valid_switches.show(5)
 # Extract the necessary data for analysis
 df_switch = df.join(valid_switches, "hh_id_in_wh", "inner")
 df_switch_pd = df_switch.toPandas()
+
+
+
+
+
+
+
+
+
+# Importing necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, to_date, lag, max as spark_max, count, when, datediff, lit, min, row_number
+from pyspark.sql.window import Window
+
+# Initializing Spark session
+spark = SparkSession.builder.appName("EDA_NonPWM_to_PWM").getOrCreate()
+
+# Load data
+df = spark.read.csv("path_to_your_data.csv", header=True, inferSchema=True)
+
+# Convert date columns to date type
+df = df.withColumn("business_date", to_date(col("business_date"), "yyyy-MM-dd"))
+df = df.withColumn("open_date", to_date(col("open_date"), "yyyy-MM-dd"))
+df = df.withColumn("close_date", to_date(col("close_date"), "yyyy-MM-dd"))
+
+# Check data types and first few rows
+df.printSchema()
+df.show(5)
+
+# Determine if the consumer was non-PWM for at least 6 months
+windowSpec = Window.partitionBy("hh_id_in_wh").orderBy(col("business_date"))
+df = df.withColumn("prev_seg_code", lag("seg_code").over(windowSpec))
+
+# Filter non-PWM segments and calculate duration
+non_pwm = df.filter(col("seg_code") != "PWM")
+
+# Debug print: Check non-PWM segments
+non_pwm.show(5)
+
+# Check if datediff calculation works in isolation
+sample_dates = non_pwm.select("hh_id_in_wh", "business_date").groupBy("hh_id_in_wh").agg(
+    min("business_date").alias("min_date"),
+    spark_max("business_date").alias("max_date")
+)
+
+# Debug print: Check sample date calculation
+sample_dates.show(5)
+
+# Add datediff calculation to the sample
+sample_dates = sample_dates.withColumn("non_pwm_duration", datediff(col("max_date"), col("min_date")))
+
+# Debug print: Check datediff calculation
+sample_dates.show(5)
+
+# Perform the groupBy and aggregation step-by-step
+
+# Step 1: Calculate the duration each consumer stayed non-PWM
+non_pwm_duration = non_pwm.groupBy("hh_id_in_wh").agg(
+    datediff(spark_max("business_date"), min("business_date")).alias("non_pwm_duration")
+)
+
+# Debug print: Check non-PWM duration calculation
+non_pwm_duration.show(5)
+
+# Step 2: Calculate the count of non-PWM records for each consumer
+non_pwm_count = non_pwm.groupBy("hh_id_in_wh").agg(
+    count("seg_code").alias("non_pwm_count")
+)
+
+# Debug print: Check non-PWM count calculation
+non_pwm_count.show(5)
+
+# Step 3: Get the last non-PWM date for each consumer
+last_non_pwm_date = non_pwm.groupBy("hh_id_in_wh").agg(
+    spark_max("business_date").alias("last_non_pwm_date")
+)
+
+# Debug print: Check last non-PWM date calculation
+last_non_pwm_date.show(5)
+
+# Combine the above results
+non_pwm_consistent = non_pwm_duration.join(non_pwm_count, "hh_id_in_wh").join(last_non_pwm_date, "hh_id_in_wh")
+
+# Ensure the consumer has been non-PWM for the full 6 months (180 days)
+non_pwm_consistent = non_pwm_consistent.filter((col("non_pwm_duration") >= 180) & (col("non_pwm_count") >= 180))
+
+# Debug print: Check the final non_pwm_consistent DataFrame
+non_pwm_consistent.show(5)
+
+# Identify consumers who switch to PWM after the non-PWM period
+switch_to_pwm = df.filter(col("seg_code") == "PWM").select("hh_id_in_wh", "business_date").distinct()
+
+# Debug print: Check the switch_to_pwm DataFrame
+switch_to_pwm.show(5)
+
+# Identify valid switches
+valid_switches = non_pwm_consistent.join(switch_to_pwm, "hh_id_in_wh", "inner") \
+    .filter(col("business_date") > col("last_non_pwm_date")).select("hh_id_in_wh").distinct()
+
+# Debug print: Check the valid_switches DataFrame
+valid_switches.show(5)
+
+# Extract the necessary data for analysis
+df_switch = df.join(valid_switches, "hh_id_in_wh", "inner")
+df_switch_pd = df_switch.toPandas()
+
+# Overview of the data
+print("Data Overview:")
+print(df_switch_pd.info())
+print(df_switch_pd.describe())
+
+# Plotting distribution of account longevity
+plt.figure(figsize=(10, 6))
+sns.histplot(df_switch_pd['account_longevity'], bins=30, kde=True)
+plt.title("Distribution of Account Longevity")
+plt.xlabel("Account Longevity (days)")
+plt.ylabel("Frequency")
+plt.show()
+
+# Balance features analysis
+plt.figure(figsize=(10, 6))
+sns.boxplot(data=df_switch_pd[['curr_bal_amt', 'ledger_bal_amt']])
+plt.title("Boxplot of Current Balance and Ledger Balance Amounts")
+plt.ylabel("Balance Amount")
+plt.show()
+
+# Product diversity analysis
+plt.figure(figsize=(10, 6))
+sns.histplot(df_switch_pd['product_diversity'], bins=30, kde=True)
+plt.title("Distribution of Product Diversity")
+plt.xlabel("Number of Distinct Products Used")
+plt.ylabel("Frequency")
+plt.show()
+
+# Transaction count analysis
+plt.figure(figsize=(10, 6))
+sns.histplot(df_switch_pd['transaction_count'], bins=30, kde=True)
+plt.title("Distribution of Transaction Count")
+plt.xlabel("Transaction Count")
+plt.ylabel("Frequency")
+plt.show()
+
+# Analyzing recent activity
+plt.figure(figsize=(10, 6))
+sns.histplot(df_switch_pd['recent_activity_1m'], bins=30, kde=True)
+plt.title("Distribution of Recent Activity (Last Month)")
+plt.xlabel("Number of Transactions in Last Month")
+plt.ylabel("Frequency")
+plt.show()
+
+# Geographic features analysis
+state_count_df = df_switch_pd['state_count'].value_counts().reset_index()
+state_count_df.columns = ['state_count', 'frequency']
+plt.figure(figsize=(10, 6))
+sns.barplot(data=state_count_df, x='state_count', y='frequency')
+plt.title("Distribution of State Count")
+plt.xlabel("Number of States")
+plt.ylabel("Frequency")
+plt.show()
+
+country_count_df = df_switch_pd['country_count'].value_counts().reset_index()
+country_count_df.columns = ['country_count', 'frequency']
+plt.figure(figsize=(10, 6))
+sns.barplot(data=country_count_df, x='country_count', y='frequency')
+plt.title("Distribution of Country Count")
+plt.xlabel("Number of Countries")
+plt.ylabel("Frequency")
+plt.show()
+
+# Analyzing one-hot encoded product features
+onehot_cols = [col for col in df_switch_pd.columns if 'standardized_prd_name_' in col]
+onehot_summary = df_switch_pd[onehot_cols].sum().reset_index()
+onehot_summary.columns = ['Product', 'Count']
+onehot_summary = onehot_summary.sort_values(by='Count', ascending=False)
+
+plt.figure(figsize=(12, 8))
+sns.barplot(data=onehot_summary, x='Count', y='Product')
+plt.title("One-Hot Encoded Product Features")
+plt.xlabel("Count")
+plt.ylabel("Product")
+plt.show()
+
+# Correlation matrix
+plt.figure(figsize=(12, 8))
+correlation_matrix = df_switch_pd.corr()
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
+plt.title("Correlation Matrix")
+plt.show()
+
+# Summary of findings
+summary = {
+    "Account Longevity": df_switch_pd['account_longevity'].describe(),
+    "Current Balance Amount": df_switch_pd['curr_bal_amt'].describe(),
+    "Ledger Balance Amount": df_switch_pd['ledger_bal_amt'].describe(),
+    "Product Diversity": df_switch_pd['product_diversity'].describe(),
+    "Transaction Count": df_switch_pd['transaction_count'].describe(),
+    "Recent Activity (Last Month)": df_switch_pd['recent_activity_1m'].describe(),
+    "State Count": state_count_df,
+    "Country Count": country_count_df,
+    "Top Products Used": onehot_summary
+}
+
+for key, value in summary.items():
+    print(f"{key}:\n{value}\n")
+
+# Closing Spark session
+spark.stop()
+
