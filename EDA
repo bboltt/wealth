@@ -366,33 +366,36 @@ plt.xlabel("Average Balance Amount")
 plt.ylabel("Frequency")
 plt.show()
 
-# Product Type Distribution
-product_type_df = combined_df.groupBy("prd_code", "group").count()
 
-# Convert to Pandas for visualization
-product_type_pd = product_type_df.toPandas()
 
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Assuming 'product_type_pd' is the DataFrame you have after concatenation
+# Example DataFrame creation (adjust this part to your actual DataFrame)
+product_type_pd = pd.DataFrame({
+    'prd_code': [...],  # your product codes
+    'group': [...]      # your groups
+})
+
+# Aggregating the count of product types by group
+product_count = product_type_pd.groupby(['prd_code', 'group']).size().reset_index(name='count')
+
+# Plotting the data
 plt.figure(figsize=(12, 8))
-sns.countplot(data=product_type_pd, x="prd_code", hue="group")
-plt.title("Product Type Distribution by Group")
-plt.xlabel("Product Type")
-plt.ylabel("Count")
-plt.xticks(rotation=45)
-plt.show()
+sns.barplot(data=product_count, x='prd_code', y='count', hue='group')
+plt.title('Product Type Distribution by Group')
+plt.xlabel('Product Code')
+plt.ylabel('Count')
+plt.xticks(rotation=90)
+plt.tight_layout()
 
+# Save the plot
+plt.savefig('/mnt/data/product_type_distribution.png')
 
-# Product Type Distribution
-product_type_df = combined_df.groupBy("prd_code", "group").count()
-
-# Convert to Pandas for visualization
-product_type_pd = product_type_df.toPandas()
-
-plt.figure(figsize=(12, 8))
-sns.countplot(data=product_type_pd, x="prd_code", hue="group")
-plt.title("Product Type Distribution by Group")
-plt.xlabel("Product Type")
-plt.ylabel("Count")
-plt.xticks(rotation=45)
+# Display the plot
 plt.show()
 
 
