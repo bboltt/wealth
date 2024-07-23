@@ -318,3 +318,99 @@ summary = {
 for key, value in summary.items():
     print(f"{key}:\n{value}\n")
 
+
+
+
+
+
+
+
+
+
+
+
+# Assuming df1, df2, df3 are the three DataFrames for different client groups
+df1 = spark.read.format("csv").option("header", "true").load("path_to_df1.csv")
+df2 = spark.read.format("csv").option("header", "true").load("path_to_df2.csv")
+df3 = spark.read.format("csv").option("header", "true").load("path_to_df3.csv")
+
+# Combine the DataFrames and add a column to indicate the group
+df1 = df1.withColumn("group", lit("group1"))
+df2 = df2.withColumn("group", lit("group2"))
+df3 = df3.withColumn("group", lit("group3"))
+
+# Concatenate the DataFrames
+combined_df = df1.union(df2).union(df3)
+
+# Filter for the relevant time period (e.g., last two years)
+from pyspark.sql.functions import col
+filtered_df = combined_df.filter(col("business_date") >= "2022-07-01")
+
+
+# Current Balance Distribution
+current_balance_df = filtered_df.select("curr_bal_amt", "group")
+
+# Convert to Pandas for visualization
+current_balance_pd = current_balance_df.toPandas()
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data=current_balance_pd, x="curr_bal_amt", hue="group", kde=True)
+plt.title("Current Balance Distribution by Group")
+plt.xlabel("Current Balance Amount")
+plt.ylabel("Frequency")
+plt.show()
+
+
+# Assuming ledger_bal_amt is recorded monthly
+# Calculate the last three months average balance
+from pyspark.sql.functions import avg
+
+last_three_months_avg_df = filtered_df \
+    .groupBy("hh_id_in_wh", "group") \
+    .agg(avg("ledger_bal_amt").alias("avg_last_three_months_bal"))
+
+# Convert to Pandas for visualization
+last_three_months_avg_pd = last_three_months_avg_df.toPandas()
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data=last_three_months_avg_pd, x="avg_last_three_months_bal", hue="group", kde=True)
+plt.title("Last Three Months Average Balance Distribution by Group")
+plt.xlabel("Average Balance Amount")
+plt.ylabel("Frequency")
+plt.show()
+
+
+# Product Type Distribution
+product_type_df = filtered_df.groupBy("prd_code", "group").count()
+
+# Convert to Pandas for visualization
+product_type_pd = product_type_df.toPandas()
+
+plt.figure(figsize=(12, 8))
+sns.countplot(data=product_type_pd, x="prd_code", hue="group")
+plt.title("Product Type Distribution by Group")
+plt.xlabel("Product Type")
+plt.ylabel("Count")
+plt.xticks(rotation=45)
+plt.show()
+
+
+# City Distribution
+city_dist_df = filtered_df.groupBy("city_name", "group").count()
+
+# Convert to Pandas for visualization
+city_dist_pd = city_dist_df.toPandas()
+
+plt.figure(figsize=(12, 8))
+sns.countplot(data=city_dist_pd, x="city_name", hue="group")
+plt.title("City Distribution by Group")
+plt.xlabel("City")
+plt.ylabel("Count")
+plt.xticks(rotation=45)
+plt.show()
+
+
+
