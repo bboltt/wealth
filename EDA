@@ -322,27 +322,27 @@ for key, value in summary.items():
 
 
 
-from pyspark.sql.functions import col, max
-
-# Get the latest business_date for each hh_id_in_wh
-windowSpec = Window.partitionBy("hh_id_in_wh").orderBy(col("business_date").desc())
-
-latest_balance_df = combined_df.withColumn("rank", row_number().over(windowSpec)) \
-                               .filter(col("rank") == 1) \
-                               .select("hh_id_in_wh", "curr_bal_amt", "group")
-
-# Convert to Pandas for visualization
-latest_balance_pd = latest_balance_df.toPandas()
-
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+# Assuming current_balance_pd is your DataFrame
+# Summing the curr_bal_amt values for each hh_id_in_wh and retaining the group information
+summed_balance_df = current_balance_pd.groupby(['hh_id_in_wh', 'group'], as_index=False)['curr_bal_amt'].sum()
+
+# Plotting the distribution of summed current balance amounts for each group separately on the same image
 plt.figure(figsize=(10, 6))
-sns.histplot(data=latest_balance_pd, x="curr_bal_amt", hue="group", kde=True)
-plt.title("Latest Current Balance Distribution by Group")
+
+groups = summed_balance_df['group'].unique()
+for group in groups:
+    sns.kdeplot(data=summed_balance_df[summed_balance_df['group'] == group], x='curr_bal_amt', label=group)
+
+plt.title("Current Balance Distribution Comparison")
 plt.xlabel("Current Balance Amount")
-plt.ylabel("Frequency")
+plt.ylabel("Density")
+plt.legend(title='Group')
 plt.show()
+
 
 from pyspark.sql.functions import avg, date_sub
 
