@@ -399,3 +399,27 @@ plt.savefig('/mnt/data/product_type_distribution.png')
 plt.show()
 
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Ensure the 'group' column is treated as a categorical variable
+filtered_balance['group'] = filtered_balance['group'].astype('category')
+
+# Create a distribution plot
+plt.figure(figsize=(12, 8))
+
+# Plot the distribution for each group separately
+for group in filtered_balance['group'].cat.categories:
+    sns.kdeplot(data=filtered_balance[filtered_balance['group'] == group], 
+                x='curr_bal_amt', 
+                fill=True, 
+                alpha=0.5, 
+                label=group)
+
+plt.title('Distribution of curr_bal_amt by Group')
+plt.xlabel('Current Balance Amount')
+plt.ylabel('Density')
+plt.legend(title='Group')
+plt.show()
+
+
