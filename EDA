@@ -1,3 +1,15 @@
+This image shows the distribution of `state_count` across four groups: `consumer`, `high net worth`, `affluent`, and `prospects`. The `state_count` indicates the number of different states covered by a household account, i.e., how many sub-accounts under one main account include different states.
+
+Key points from the image are:
+
+1. The most frequent `state_count` for all four groups is 1.
+2. The `high net worth` and `affluent` groups occasionally exhibit higher `state_count` values, such as 12, 15, and 16.
+3. The `prospects` group's distribution is similar to that of the `consumer` group since prospects are derived from consumers; thus, they do not exhibit very high `state_count` values.
+4. If `state_count` is greater than 5, it invariably belongs to private wealth groups, either `high net worth` or `affluent`.
+
+
+
+
 # Importing necessary libraries
 import pandas as pd
 import numpy as np
