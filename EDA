@@ -1,3 +1,15 @@
+The plots show the distribution of `balance_trend` for different groups: `consumer`, `high net worth`, `affluent`, and `prospects`. The `balance_trend` represents the slope of the balance change from this month compared to the previous month, averaged over six months.
+
+Key observations:
+1. **High Net Worth**: This group is more likely to have extreme values of `balance_trend`, indicating significant fluctuations in their balances.
+2. **Consumer, Affluent, and Prospects**: These groups have a more concentrated distribution of `balance_trend`, with fewer extreme values compared to the high net worth group.
+
+Explanation of `balance_trend`: It is the slope of the balance change from this month compared to the previous month, averaged over six months (`这个月的balance对比上个月balance，它的变化的slope，然后是用6个月的数据去做计算做的平均值`).
+
+
+
+
+
 This image shows the distribution of `state_count` across four groups: `consumer`, `high net worth`, `affluent`, and `prospects`. The `state_count` indicates the number of different states covered by a household account, i.e., how many sub-accounts under one main account include different states.
 
 Key points from the image are:
