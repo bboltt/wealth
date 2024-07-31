@@ -1,3 +1,27 @@
+The plots show the distribution of the number of account types (`account_type_count`) at the IPID level for different groups: `consumer`, `high net worth`, `affluent`, and `prospects`. Here, `IPID` represents a level below the household level, meaning a single household can have multiple IPIDs, each corresponding to different account types. Therefore, the `account_type_count` indicates how many different IPID account types a household has.
+
+Key observations:
+
+1. **Violin Plot**:
+    - **Consumers**: The distribution is tightly clustered around lower account type counts, typically between 1 and 5.
+    - **High Net Worth**: The distribution is more spread out, with a wider range of account type counts, and some households having up to 20 different account types.
+    - **Affluent**: Similar to high net worth, but slightly less spread out, with account type counts up to around 15.
+    - **Prospects**: The distribution is also more spread out, with account type counts ranging from 1 to about 15, resembling the distribution of affluent customers.
+
+2. **Box Plot**:
+    - **Consumers**: Most households have 1 to 5 account types, with few outliers.
+    - **High Net Worth**: Households typically have between 5 and 15 account types, with several outliers having up to 20 account types.
+    - **Affluent**: The range is similar to high net worth but with fewer extreme outliers.
+    - **Prospects**: Households generally have between 5 and 15 account types, with a few outliers above 15.
+
+### Summary:
+- **High Net Worth and Affluent** groups tend to have a higher number of account types at the IPID level compared to Consumers and Prospects.
+- **Consumers** have a more concentrated distribution with lower account type counts.
+- **Prospects** show a distribution pattern similar to Affluent, indicating a higher diversity of account types compared to Consumers.
+
+
+
+
 The plots show the distribution of `balance_trend` for different groups: `consumer`, `high net worth`, `affluent`, and `prospects`. The `balance_trend` represents the slope of the balance change from this month compared to the previous month, averaged over six months.
 
 Key observations:
