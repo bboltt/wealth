@@ -1,54 +1,65 @@
-This plot shows the distribution of current balance amounts for different groups: `consumer`, `affluent`, `prospects`, and `high net worth`. 
+This plot shows the distribution of product diversity (the number of distinct products used) for different groups: `consumer`, `high net worth`, `affluent`, and `prospects`.
 
 ### Key Observations:
 
 1. **Consumers**:
-   - Consumers have a large density in the low balance range, indicating that a significant portion of consumers maintain lower balances compared to other groups.
-   - The density decreases sharply as the balance amount increases.
-
-2. **Affluent**:
-   - The affluent group shows a more balanced distribution, with a moderate density spread across a wider range of balance amounts.
-   - There is a noticeable density in the mid to high balance range.
-
-3. **Prospects**:
-   - Prospects exhibit a distribution pattern similar to affluent and high net worth groups, with a relatively even spread of balances.
-   - The density for prospects is lower compared to affluent but still shows a presence in the mid to high balance range.
-
-4. **High Net Worth**:
-   - The high net worth group has a significant presence across all balance ranges, with the highest density among higher balances.
-   - This group shows a flatter and more widespread distribution, indicating that high net worth individuals maintain higher balances overall.
-
-### Summary:
-- **Consumers** show a distinct pattern with a high density of low balance amounts, making them different from the other groups.
-- **Affluent**, **prospects**, and **high net worth** groups share similarities, with more evenly distributed balances and higher presence in the mid to high balance ranges.
-- The plot highlights how consumers differ significantly in their balance distribution, with a large portion having lower balances compared to the affluent, prospects, and high net worth groups.
-
-
-
-This plot shows the distribution of 3-month average balance amounts for different groups: `high net worth`, `consumer`, `affluent`, and `prospects`.
-
-### Key Observations:
-
-1. **Consumers**:
-   - Consumers have a large density in the low balance range, indicating that a significant portion of consumers maintain lower balances.
-   - The density decreases sharply as the balance amount increases, similar to their current balance distribution.
+   - Consumers have a high frequency in the lower ranges of product diversity, primarily using between 1 to 5 distinct products.
+   - The frequency decreases significantly as the number of distinct products used increases.
+   - This indicates that most consumers use a limited number of products.
 
 2. **High Net Worth**:
-   - The high net worth group has a flatter and more widespread distribution, indicating that high net worth individuals maintain higher average balances over three months.
-   - This group shows a consistent presence across all balance ranges.
+   - The high net worth group shows a more balanced distribution across a wider range of product diversity.
+   - There is a noticeable presence in the higher ranges of distinct products used, indicating that high net worth individuals tend to use a broader variety of products.
 
 3. **Affluent**:
-   - The affluent group shows a more balanced distribution, with a moderate density spread across a wider range of balance amounts.
-   - There is a noticeable density in the mid to high balance range.
+   - The affluent group has a similar pattern to the high net worth group, but with a slightly higher frequency in the mid-range of product diversity (3 to 6 distinct products).
+   - This group also shows a significant presence in using a variety of products, although less than the high net worth group.
 
 4. **Prospects**:
-   - Prospects exhibit a distribution pattern similar to affluent and high net worth groups, with a relatively even spread of balances.
-   - The density for prospects is lower compared to affluent but still shows a presence in the mid to high balance range.
+   - Prospects exhibit a distribution pattern that is more similar to the affluent and high net worth groups than to consumers.
+   - There is a relatively even spread across the lower to mid-range of product diversity, with fewer prospects using a high number of distinct products.
 
 ### Summary:
-- The **high net worth**, **affluent**, and **prospects** groups show similarities in their 3-month average balance distributions, with higher densities at lower balances and some individuals with higher balances.
-- The **consumer** group's distribution is distinctly different, with generally lower average balances and a steeper decline, indicating less variation in balance amounts compared to the other groups.
-- The plot highlights how consumers differ significantly in their average balance distribution, with a large portion having lower balances compared to the affluent, prospects, and high net worth groups. This pattern is similar to the current balance distribution.
+- The **consumer** group's distribution indicates that they generally use fewer distinct products, with the highest frequencies in the 1 to 3 product range.
+- **High net worth**, **affluent**, and **prospects** groups show greater product diversity, with a more balanced spread across a wider range of distinct products.
+- High net worth individuals tend to use a broader variety of products, followed by affluent and prospects, who also show a significant but slightly lesser product diversity.
+- The plot highlights the differences in product usage patterns, emphasizing that consumers are distinct in their limited product diversity compared to the other groups.
+
+
+
+This plot compares the product usage patterns across different groups: `consumer`, `high net worth`, `affluent`, and `prospects`.
+
+### Key Observations:
+
+1. **Consumers**:
+   - The most common products used by consumers are `CHECKING`, `CREDIT CARD`, `MONEY MARKET`, and `REGULAR CD`.
+   - Products such as `HELOC`, `SBL`, and `COMMERCIAL LINE OF CREDIT` are less frequently used.
+
+2. **High Net Worth**:
+   - High net worth individuals show a broader variety of product usage compared to consumers.
+   - Commonly used products include `CHECKING`, `CREDIT CARD`, `MONEY MARKET`, and `INDIVIDUAL`.
+   - There is noticeable usage of more specialized products like `IRREVOCABLE TRUST`, `REVOCABLE TRUST`, and `COMMERCIAL LINE OF CREDIT`.
+
+3. **Affluent**:
+   - Affluent individuals have a diverse product usage pattern, similar to high net worth.
+   - Key products include `CHECKING`, `CREDIT CARD`, `MONEY MARKET`, `INDIVIDUAL`, and `HELOC`.
+   - This group also shows significant usage of `REVOCABLE TRUST` and `ROTH IRA`.
+
+4. **Prospects**:
+   - Prospects have product usage patterns similar to affluent and high net worth groups.
+   - The most used products are `CHECKING`, `CREDIT CARD`, and `MONEY MARKET`.
+   - There is also noticeable usage of `INDIVIDUAL`, `REVOCABLE TRUST`, and `HELOC`.
+
+### Summary:
+- **Consumers** primarily use basic banking products such as `CHECKING`, `CREDIT CARD`, `MONEY MARKET`, and `REGULAR CD`, indicating a more limited product diversity.
+- **High net worth** and **affluent** individuals show a broader range of product usage, including more specialized products like `INDIVIDUAL`, `IRREVOCABLE TRUST`, `REVOCABLE TRUST`, and various credit products.
+- **Prospects** exhibit product usage patterns similar to the affluent and high net worth groups, suggesting that they have potential to become high net worth or affluent customers.
+- Overall, the plot highlights that existing PWM (Private Wealth Management) and prospects have closer product patterns, using a more diverse range of financial products compared to consumers.
+
+
+
+
+
 
 
 The plots show the distribution of the number of account types (`account_type_count`) at the IPID level for different groups: `consumer`, `high net worth`, `affluent`, and `prospects`. Here, `IPID` represents a level below the household level, meaning a single household can have multiple IPIDs, each corresponding to different account types. Therefore, the `account_type_count` indicates how many different IPID account types a household has.
