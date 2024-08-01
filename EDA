@@ -1,29 +1,55 @@
+This plot shows the distribution of current revenue amounts for different groups: `high net worth`, `consumer`, `affluent`, and `prospects`. The x-axis is log-scaled, which helps to better visualize the distribution over a wide range of revenue amounts.
+
+### Key Observations:
+
+1. **High Net Worth**:
+   - The distribution shows a higher density at lower revenue amounts, with a decline as revenue increases.
+   - This indicates that many high net worth individuals have lower current revenues, with fewer individuals having significantly higher revenues.
+
+2. **Affluent**:
+   - The distribution is relatively flat, indicating a more even spread of current revenues across different amounts, with moderate revenues being more common.
+   - Similar to high net worth but with a more balanced distribution.
+
+3. **Prospects**:
+   - The density is highest at the lowest revenue amounts, with a sharp decline, indicating that prospects generally have very low current revenues.
+   - The distribution pattern is similar to that of affluent and high net worth groups, suggesting that prospects share characteristics with these groups.
+
+4. **Consumer**:
+   - The distribution for consumers is different from the other groups, with a much steeper decline and lower densities across all revenue amounts.
+   - This suggests that consumers generally have lower current revenues and do not exhibit the same spread or tail as seen in high net worth, affluent, and prospects groups.
+
+### Summary:
+- The **high net worth**, **affluent**, and **prospects** groups show similarities in their revenue distributions, with higher densities at lower revenues and some individuals with higher revenues.
+- The **consumer** group's distribution is distinctly different, with generally lower current revenues and a steeper decline, indicating less variation in revenue amounts compared to the other groups.
+- The log-scaled x-axis reveals these patterns more clearly, emphasizing the similarities among high net worth, affluent, and prospects, and highlighting the difference in the consumer group's revenue distribution.
+
+
+
+
 This plot shows the distribution of the 3-month average revenue amount for different groups: `high net worth`, `consumer`, `affluent`, and `prospects`. The x-axis is log-scaled, which helps to better visualize the distribution over a wide range of revenue amounts.
 
 ### Key Observations:
 
 1. **High Net Worth**:
-   - The distribution shows a higher density at lower revenue amounts, with a steep decline as revenue increases.
-   - This indicates that while many high net worth individuals have lower average revenues, there are fewer individuals with significantly higher revenues.
+   - The distribution shows a higher density at lower revenue amounts, with a decline as revenue increases.
+   - Many high net worth individuals have lower average revenues, but there are fewer individuals with significantly higher revenues, indicated by the tail.
 
-2. **Consumer**:
-   - The distribution for consumers shows a similar pattern to high net worth but with a slightly flatter curve.
-   - This suggests that consumers generally have lower 3-month average revenues, with fewer extreme values.
+2. **Affluent**:
+   - The distribution is relatively flat, indicating a more even spread of average revenues across different amounts, with moderate revenues being more common.
+   - Similar to high net worth but with a more balanced distribution.
 
-3. **Affluent**:
-   - The affluent group's distribution is relatively flat, indicating a more even spread of average revenues across different amounts.
-   - This group shows a slightly higher density of moderate revenues compared to high net worth and consumers.
+3. **Prospects**:
+   - The density is highest at the lowest revenue amounts, with a sharp decline, indicating that prospects generally have very low average revenues.
+   - The distribution pattern is similar to that of affluent and high net worth groups, suggesting that prospects share characteristics with these groups.
 
-4. **Prospects**:
-   - The prospects group has the highest density at the lowest revenue amounts, with a sharp decline similar to the high net worth group.
-   - This suggests that prospects, who are derived from consumers, generally have very low average revenues, with very few having high revenues.
+4. **Consumer**:
+   - The distribution for consumers is different from the other groups, with a flatter curve and lower densities across all revenue amounts.
+   - This suggests that consumers generally have lower 3-month average revenues and do not exhibit the same spread or tail as seen in high net worth, affluent, and prospects groups.
 
 ### Summary:
-- The log-scaled x-axis reveals that all groups have the highest density at lower revenue amounts, with a decline as revenue increases.
-- The **high net worth** group, despite its name, includes many individuals with lower average revenues, but the distribution allows for higher revenue outliers.
-- **Consumers** and **prospects** generally have lower average revenues, with prospects showing the lowest overall.
-- The **affluent** group has a more balanced distribution, with a higher density of moderate revenues compared to the other groups.
-
+- The **high net worth**, **affluent**, and **prospects** groups show similarities in their revenue distributions, with higher densities at lower revenues and some individuals with higher revenues.
+- The **consumer** group's distribution is distinctly different, with generally lower average revenues and a flatter distribution, indicating less variation in revenue amounts compared to the other groups.
+- The log-scaled x-axis reveals these patterns more clearly, emphasizing the similarities among high net worth, affluent, and prospects, and highlighting the difference in the consumer group's revenue distribution.
 
 
 The plots show the distribution of the number of account types (`account_type_count`) at the IPID level for different groups: `consumer`, `high net worth`, `affluent`, and `prospects`. Here, `IPID` represents a level below the household level, meaning a single household can have multiple IPIDs, each corresponding to different account types. Therefore, the `account_type_count` indicates how many different IPID account types a household has.
