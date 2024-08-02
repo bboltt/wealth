@@ -1,4 +1,4 @@
-Sure, here’s a more conversational summary of the achievements in July:
+Got it! Let's integrate that important detail into the summary.
 
 ---
 
@@ -9,7 +9,7 @@ Hey team,
 Here's a quick recap of what we accomplished in July:
 
 1. **Data Preparation and Feature Engineering**:
-   - We pulled consumer data from the EIL database and explored various features to understand our dataset better. Our feature engineering pipeline focused on key aspects like account longevity, balance amounts, product diversity, transaction counts, recent activity, and geographic features.
+   - We pulled consumer data from the EIL schema, which includes all consumers, as the original schema didn’t have the complete data. We explored various features to understand our dataset better. Our feature engineering pipeline focused on key aspects like account longevity, balance amounts, product diversity, transaction counts, recent activity, and geographic features.
 
 2. **Building the Pipeline**:
    - We successfully built and completed our model pipeline. This involved clustering our existing private wealth management (PWM) clients and calculating the similarity of each consumer to these cluster centers. This process helped us rank potential new PWM clients effectively.
@@ -31,7 +31,7 @@ Overall, we've made significant progress in July, laying a strong foundation for
 
 ---
 
-This conversational summary should help convey our progress and achievements in a more engaging and relatable way.
+This summary should now reflect the importance of pulling consumer data from the EIL schema and our comprehensive efforts in the project.
 
 
 
