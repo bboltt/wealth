@@ -1,62 +1,37 @@
-This plot shows the distribution of product diversity (the number of distinct products used) for different groups: `consumer`, `high net worth`, `affluent`, and `prospects`.
+Sure, here’s a more conversational summary of the achievements in July:
 
-### Key Observations:
+---
 
-1. **Consumers**:
-   - Consumers have a high frequency in the lower ranges of product diversity, primarily using between 1 to 5 distinct products.
-   - The frequency decreases significantly as the number of distinct products used increases.
-   - This indicates that most consumers use a limited number of products.
+**Summary of Achievements in July**
 
-2. **High Net Worth**:
-   - The high net worth group shows a more balanced distribution across a wider range of product diversity.
-   - There is a noticeable presence in the higher ranges of distinct products used, indicating that high net worth individuals tend to use a broader variety of products.
+Hey team,
 
-3. **Affluent**:
-   - The affluent group has a similar pattern to the high net worth group, but with a slightly higher frequency in the mid-range of product diversity (3 to 6 distinct products).
-   - This group also shows a significant presence in using a variety of products, although less than the high net worth group.
+Here's a quick recap of what we accomplished in July:
 
-4. **Prospects**:
-   - Prospects exhibit a distribution pattern that is more similar to the affluent and high net worth groups than to consumers.
-   - There is a relatively even spread across the lower to mid-range of product diversity, with fewer prospects using a high number of distinct products.
+1. **Data Preparation and Feature Engineering**:
+   - We pulled consumer data from the EIL database and explored various features to understand our dataset better. Our feature engineering pipeline focused on key aspects like account longevity, balance amounts, product diversity, transaction counts, recent activity, and geographic features.
 
-### Summary:
-- The **consumer** group's distribution indicates that they generally use fewer distinct products, with the highest frequencies in the 1 to 3 product range.
-- **High net worth**, **affluent**, and **prospects** groups show greater product diversity, with a more balanced spread across a wider range of distinct products.
-- High net worth individuals tend to use a broader variety of products, followed by affluent and prospects, who also show a significant but slightly lesser product diversity.
-- The plot highlights the differences in product usage patterns, emphasizing that consumers are distinct in their limited product diversity compared to the other groups.
+2. **Building the Pipeline**:
+   - We successfully built and completed our model pipeline. This involved clustering our existing private wealth management (PWM) clients and calculating the similarity of each consumer to these cluster centers. This process helped us rank potential new PWM clients effectively.
 
+3. **Generating Prospects**:
+   - Using the model pipeline, we generated a list of top prospective PWM clients. This was a significant step forward as it allowed us to identify and prioritize high-potential clients.
 
+4. **Evaluation and Metrics**:
+   - We defined our ground truth for evaluation based on historical consumers who switched from non-PWM to PWM. Our initial evaluation showed a precision of 0.47 and a recall of 0.02. This means that while nearly half of our identified prospects are accurate, we're currently capturing only a small fraction of all potential switches.
 
-This plot compares the product usage patterns across different groups: `consumer`, `high net worth`, `affluent`, and `prospects`.
+5. **Exploratory Data Analysis (EDA)**:
+   - We conducted EDA to compare different groups: the model's prospecting group, other consumers, existing high net worth clients, and existing affluent clients. This helped us understand the common characteristics of consumers who switched from non-PWM to PWM and identify areas for improvement.
 
-### Key Observations:
+6. **Challenges and Next Steps**:
+   - We realized that refining our ground truth definition could help improve the model's recall. Additionally, we need more solid target data, especially client feedback post-relationship manager approaches, to refine our model further.
+   - Our current focus is on performing EDA on consumers who switched from non-PWM to PWM. We're looking to identify key features that can be incorporated into our model to improve its accuracy and effectiveness.
 
-1. **Consumers**:
-   - The most common products used by consumers are `CHECKING`, `CREDIT CARD`, `MONEY MARKET`, and `REGULAR CD`.
-   - Products such as `HELOC`, `SBL`, and `COMMERCIAL LINE OF CREDIT` are less frequently used.
+Overall, we've made significant progress in July, laying a strong foundation for the next phases of our project. Great work, everyone!
 
-2. **High Net Worth**:
-   - High net worth individuals show a broader variety of product usage compared to consumers.
-   - Commonly used products include `CHECKING`, `CREDIT CARD`, `MONEY MARKET`, and `INDIVIDUAL`.
-   - There is noticeable usage of more specialized products like `IRREVOCABLE TRUST`, `REVOCABLE TRUST`, and `COMMERCIAL LINE OF CREDIT`.
+---
 
-3. **Affluent**:
-   - Affluent individuals have a diverse product usage pattern, similar to high net worth.
-   - Key products include `CHECKING`, `CREDIT CARD`, `MONEY MARKET`, `INDIVIDUAL`, and `HELOC`.
-   - This group also shows significant usage of `REVOCABLE TRUST` and `ROTH IRA`.
-
-4. **Prospects**:
-   - Prospects have product usage patterns similar to affluent and high net worth groups.
-   - The most used products are `CHECKING`, `CREDIT CARD`, and `MONEY MARKET`.
-   - There is also noticeable usage of `INDIVIDUAL`, `REVOCABLE TRUST`, and `HELOC`.
-
-### Summary:
-- **Consumers** primarily use basic banking products such as `CHECKING`, `CREDIT CARD`, `MONEY MARKET`, and `REGULAR CD`, indicating a more limited product diversity.
-- **High net worth** and **affluent** individuals show a broader range of product usage, including more specialized products like `INDIVIDUAL`, `IRREVOCABLE TRUST`, `REVOCABLE TRUST`, and various credit products.
-- **Prospects** exhibit product usage patterns similar to the affluent and high net worth groups, suggesting that they have potential to become high net worth or affluent customers.
-- Overall, the plot highlights that existing PWM (Private Wealth Management) and prospects have closer product patterns, using a more diverse range of financial products compared to consumers.
-
-
+This conversational summary should help convey our progress and achievements in a more engaging and relatable way.
 
 
 
