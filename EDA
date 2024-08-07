@@ -1,62 +1,57 @@
-Got it! Let's integrate that important detail into the summary.
+Key Feature Review - Balance
+Current Balance Distribution Comparison:
 
----
+This plot shows that consumers have a large density in the low balance range, while affluent, prospects, and high net worth groups have more evenly distributed balances and higher presence in the mid to high balance ranges.
 
-**Summary of Achievements in July**
+3 Months AVG Balance Distribution Comparison:
 
-Hey team,
-
-Here's a quick recap of what we accomplished in July:
-
-1. **Data Preparation and Feature Engineering**:
-   - We pulled consumer data from the EIL schema, which includes all consumers, as the original schema didn’t have the complete data. We explored various features to understand our dataset better. Our feature engineering pipeline focused on key aspects like account longevity, balance amounts, product diversity, transaction counts, recent activity, and geographic features.
-
-2. **Building the Pipeline**:
-   - We successfully built and completed our model pipeline. This involved clustering our existing private wealth management (PWM) clients and calculating the similarity of each consumer to these cluster centers. This process helped us rank potential new PWM clients effectively.
-
-3. **Generating Prospects**:
-   - Using the model pipeline, we generated a list of top prospective PWM clients. This was a significant step forward as it allowed us to identify and prioritize high-potential clients.
-
-4. **Evaluation and Metrics**:
-   - We defined our ground truth for evaluation based on historical consumers who switched from non-PWM to PWM. Our initial evaluation showed a precision of 0.47 and a recall of 0.02. This means that while nearly half of our identified prospects are accurate, we're currently capturing only a small fraction of all potential switches.
-
-5. **Exploratory Data Analysis (EDA)**:
-   - We conducted EDA to compare different groups: the model's prospecting group, other consumers, existing high net worth clients, and existing affluent clients. This helped us understand the common characteristics of consumers who switched from non-PWM to PWM and identify areas for improvement.
-
-6. **Challenges and Next Steps**:
-   - We realized that refining our ground truth definition could help improve the model's recall. Additionally, we need more solid target data, especially client feedback post-relationship manager approaches, to refine our model further.
-   - Our current focus is on performing EDA on consumers who switched from non-PWM to PWM. We're looking to identify key features that can be incorporated into our model to improve its accuracy and effectiveness.
-
-Overall, we've made significant progress in July, laying a strong foundation for the next phases of our project. Great work, everyone!
-
----
-
-This summary should now reflect the importance of pulling consumer data from the EIL schema and our comprehensive efforts in the project.
+This plot highlights that consumers maintain lower average balances compared to affluent, prospects, and high net worth groups, who show similarities in their 3-month average balance distributions with higher densities at lower balances and some individuals with higher balances.
 
 
+### Key Feature Review - Balance
+
+**Balance Trend Distribution by Group:**
+
+High Net Worth group is more likely to have extreme balance trend values, indicating significant fluctuations. Consumers, Affluent, and Prospects have a more concentrated balance trend distribution with fewer extreme values compared to High Net Worth.
+
+
+Here are the condensed descriptions for each slide:
+
+### Key Feature Review - Balance
+
+**Slide 1: Current Balance Distribution**
+This plot shows that consumers have a large density in the low balance range, indicating that many consumers maintain lower balances compared to other groups. Affluent, prospects, and high-net-worth groups share similarities, with more evenly distributed balances and higher presence in the mid to high balance ranges.
+
+**Slide 2: 3-Month Average Balance Distribution**
+This plot highlights that consumers consistently have lower average balances, similar to their current balance distribution. The high-net-worth, affluent, and prospects groups display similar patterns with higher densities at lower balances and individuals with higher balances.
+
+### Key Feature Review - Balance Trend
+
+**Balance Trend Distribution by Group**
+The plots show that the high-net-worth group is more likely to have extreme values of balance trend, indicating significant fluctuations in their balances. Consumers, affluent, and prospects have more concentrated distributions with fewer extreme values compared to the high-net-worth group.
+
+### Key Feature Review - Revenue
+
+**Slide 1: Current Revenue Distribution**
+This plot shows that the high-net-worth, affluent, and prospects groups share similarities in their revenue distributions, with higher densities at lower revenues and some individuals with higher revenues. The consumer group's distribution is distinctly different, with generally lower current revenues and a steeper decline.
+
+**Slide 2: 3-Month Average Revenue Distribution**
+The high-net-worth, affluent, and prospects groups show similarities in their 3-month average revenue distributions. The consumer group's distribution differs significantly, with lower average revenues and less variation.
+
+### Key Feature Review - Product Distribution
+
+**Slide 1: Product Usage Patterns**
+This plot compares product usage patterns across different groups. Consumers primarily use checking, credit card, money market, and regular CD. High-net-worth and affluent individuals show a broader variety of product usage, including more specialized products. Prospects exhibit a distribution pattern similar to affluent and high-net-worth groups.
+
+**Slide 2: Product Diversity Distribution**
+This plot shows the distribution of product diversity for different groups. Consumers primarily use between 1 to 5 distinct products, while high-net-worth and affluent groups show a more balanced distribution across a wider range. Prospects exhibit a pattern similar to affluent and high-net-worth groups, indicating a higher diversity of products compared to consumers.
+
+**Slide 3: Account Type Count by IP_ID Level**
+The plots show that high-net-worth and affluent groups tend to have a higher number of account types compared to consumers. Consumers have a more concentrated distribution with lower account type counts. Prospects show a distribution pattern similar to affluent and high-net-worth groups, indicating higher diversity of account types compared to other consumers.
 
 
 
-The plots show the distribution of the number of account types (`account_type_count`) at the IPID level for different groups: `consumer`, `high net worth`, `affluent`, and `prospects`. Here, `IPID` represents a level below the household level, meaning a single household can have multiple IPIDs, each corresponding to different account types. Therefore, the `account_type_count` indicates how many different IPID account types a household has.
 
-Key observations:
-
-1. **Violin Plot**:
-    - **Consumers**: The distribution is tightly clustered around lower account type counts, typically between 1 and 5.
-    - **High Net Worth**: The distribution is more spread out, with a wider range of account type counts, and some households having up to 20 different account types.
-    - **Affluent**: Similar to high net worth, but slightly less spread out, with account type counts up to around 15.
-    - **Prospects**: The distribution is also more spread out, with account type counts ranging from 1 to about 15, resembling the distribution of affluent customers.
-
-2. **Box Plot**:
-    - **Consumers**: Most households have 1 to 5 account types, with few outliers.
-    - **High Net Worth**: Households typically have between 5 and 15 account types, with several outliers having up to 20 account types.
-    - **Affluent**: The range is similar to high net worth but with fewer extreme outliers.
-    - **Prospects**: Households generally have between 5 and 15 account types, with a few outliers above 15.
-
-### Summary:
-- **High Net Worth and Affluent** groups tend to have a higher number of account types at the IPID level compared to Consumers and Prospects.
-- **Consumers** have a more concentrated distribution with lower account type counts.
-- **Prospects** show a distribution pattern similar to Affluent, indicating a higher diversity of account types compared to Consumers.
 
 
 
