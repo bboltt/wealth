@@ -1,3 +1,73 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from datetime import datetime, timedelta
+
+# Assuming your dataframe is named df
+# df = pd.DataFrame(columns=['id', 'transaction_amt', 'transaction_date', 'group'])
+
+# Ensure transaction_date is in datetime format
+df['transaction_date'] = pd.to_datetime(df['transaction_date'])
+
+# Get the recent one month transactions
+one_month_ago = datetime.now() - timedelta(days=30)
+recent_df = df[df['transaction_date'] >= one_month_ago]
+
+# Calculate max transaction amount by id
+max_transaction_by_id = df.groupby(['id', 'group'])['transaction_amt'].max().reset_index(name='max_transaction')
+
+# Calculate recent one month total positive transaction by id
+positive_transactions = recent_df[recent_df['transaction_amt'] > 0].groupby(['id', 'group'])['transaction_amt'].sum().reset_index(name='total_positive_transactions')
+
+# Calculate recent one month total negative transaction by id
+negative_transactions = recent_df[recent_df['transaction_amt'] < 0].groupby(['id', 'group'])['transaction_amt'].sum().reset_index(name='total_negative_transactions')
+
+# Merge all data
+merged_df = max_transaction_by_id.merge(positive_transactions, on=['id', 'group'], how='left')
+merged_df = merged_df.merge(negative_transactions, on=['id', 'group'], how='left')
+merged_df.fillna(0, inplace=True)
+
+# Plotting
+plt.figure(figsize=(12, 8))
+
+# Max Transaction Plot
+plt.subplot(3, 1, 1)
+sns.boxplot(x='group', y='max_transaction', data=merged_df)
+plt.title('Max Transaction Amount by Group')
+plt.xlabel('Group')
+plt.ylabel('Max Transaction Amount')
+
+# Total Positive Transactions Plot
+plt.subplot(3, 1, 2)
+sns.boxplot(x='group', y='total_positive_transactions', data=merged_df)
+plt.title('Recent One Month Total Positive Transactions by Group')
+plt.xlabel('Group')
+plt.ylabel('Total Positive Transactions')
+
+# Total Negative Transactions Plot
+plt.subplot(3, 1, 3)
+sns.boxplot(x='group', y='total_negative_transactions', data=merged_df)
+plt.title('Recent One Month Total Negative Transactions by Group')
+plt.xlabel('Group')
+plt.ylabel('Total Negative Transactions')
+
+plt.tight_layout()
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Key Feature Review - Balance
 Current Balance Distribution Comparison:
 
