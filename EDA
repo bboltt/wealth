@@ -1,3 +1,18 @@
+"In this slide, I'm going to walk you through the wealth management business flow we've developed.
+
+On the left side, we start with all customers. These customers are then segmented by applying the wealth segment criteria, resulting in a refined group of all consumers. These consumers, with wealth segment data applied, are fed into our prospecting model, which then generates outcome prospecting targets.
+
+On the right side, we see our existing Private Wealth Management (PWM) data, which is divided into two key segments: High Net Worth and Affluent. This data is crucial as it serves as the foundation for creating our prospecting model.
+
+The core idea is that by learning similarities between consumers and PWM clients, including customer profiles, demographics, psychographics, and pattern recognition, we're able to build a model that can accurately identify potential high-value prospects and target them effectively.
+
+Overall, this business flow integrates both existing and potential client data to streamline and enhance our wealth management efforts."
+
+
+
+
+
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
