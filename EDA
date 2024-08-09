@@ -1,12 +1,14 @@
-"In this slide, I'm going to walk you through the wealth management business flow we've developed.
+This slide provides a high-level overview of our model, which is divided into three main sections: Scope, Features Engineering, and Modeling.
 
-On the left side, we start with all customers. These customers are then segmented by applying the wealth segment criteria, resulting in a refined group of all consumers. These consumers, with wealth segment data applied, are fed into our prospecting model, which then generates outcome prospecting targets.
+On the left, under Scope, we define the different segments of our prospecting targets. We're focusing on both high-net-worth and affluent prospects, as well as the broader consumer population.
 
-On the right side, we see our existing Private Wealth Management (PWM) data, which is divided into two key segments: High Net Worth and Affluent. This data is crucial as it serves as the foundation for creating our prospecting model.
+In the middle, under Features Engineering, we identify the key features that feed into our model: Demographic, Behavior, Balance, Product, and Revenue. These features are crucial for distinguishing between different types of customers and for ensuring the accuracy of our predictions.
 
-The core idea is that by learning similarities between consumers and PWM clients, including customer profiles, demographics, psychographics, and pattern recognition, we're able to build a model that can accurately identify potential high-value prospects and target them effectively.
+On the right, in the Modeling section, we outline the process of how these features are used. For both existing high-net-worth and affluent groups, we apply feature engineering and then cluster the data to determine the center points. 
 
-Overall, this business flow integrates both existing and potential client data to streamline and enhance our wealth management efforts."
+Similarly, for consumers, we apply feature engineering and then transform the data into vector representations. These representations are then compared against the cluster centers from our high-net-worth and affluent groups through similarity computation and ranking.
+
+The result of this process allows us to accurately identify and rank high-net-worth and affluent prospects from the broader consumer population, which helps us target them more effectively."
 
 
 
