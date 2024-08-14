@@ -1,7 +1,6 @@
-consumers tend to have smaller changes in their balance amounts over a month, indicating more stability. The second chart highlights that the high-net-worth group is more likely to experience significant changes in their balances, showing greater fluctuations. The affluent and prospects groups fall in between, with balance changes that are more moderate compared to the high-net-worth group but still higher than consumers.
+The first chart shows that high-net-worth, affluent, and prospects groups tend to have similar patterns in their revenue, with most households earning lower revenues and a few earning significantly higher amounts. In contrast, consumers generally have lower revenues, with much less variation across the group.
 
-
-
+The second chart highlights the same trend over a three-month average, reinforcing that high-net-worth, affluent, and prospects groups are similar, while consumers stand out with consistently lower average revenues.
 
 import pandas as pd
 import matplotlib.pyplot as plt
