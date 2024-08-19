@@ -1,6 +1,48 @@
-The first chart shows that high-net-worth, affluent, and prospects groups tend to have similar patterns in their revenue, with most households earning lower revenues and a few earning significantly higher amounts. In contrast, consumers generally have lower revenues, with much less variation across the group.
+"In this slide, we're examining the balance patterns across different groups.
 
-The second chart highlights the same trend over a three-month average, reinforcing that high-net-worth, affluent, and prospects groups are similar, while consumers stand out with consistently lower average revenues.
+On the left, the chart shows that most consumers tend to maintain lower balances, meaning they generally keep smaller amounts of money in their accounts. This is illustrated by the higher peak at the lower balance range for consumers.
+
+On the right, we see that affluent, high-net-worth, and prospects show a broader range of balances. They maintain both lower and higher balances, indicating more evenly spread financial behavior across different balance amounts.
+
+Overall, while consumers mostly operate with lower balances, the other groups demonstrate a more diverse balance range, which could suggest more complex financial needs or activities."
+
+"In this slide, we're looking at how much the balance amounts change over a month for different groups.
+
+On the left, we see that consumers generally have smaller changes in their balances from month to month, which suggests more stable financial behavior.
+
+On the right, the high-net-worth group shows larger fluctuations, indicating that their balances are more likely to change significantly over time. Affluent and prospects fall somewhere in between, with changes that are more moderate compared to the high-net-worth group but larger than those seen in consumers.
+
+This comparison helps us understand the varying financial behaviors across these groups, with consumers being the most stable, while high-net-worth individuals experience greater variability in their balances."
+
+"In this slide, we're looking at how much the balance amounts change over a month for different groups.
+
+On the left, we see that consumers generally have smaller changes in their balances from month to month, which suggests more stable financial behavior.
+
+On the right, the high-net-worth group shows larger fluctuations, indicating that their balances are more likely to change significantly over time. Affluent and prospects fall somewhere in between, with changes that are more moderate compared to the high-net-worth group but larger than those seen in consumers.
+
+This comparison helps us understand the varying financial behaviors across these groups, with consumers being the most stable, while high-net-worth individuals experience greater variability in their balances."
+
+"In this slide, we see how different groups use a variety of financial products.
+
+Consumers typically use between 1 to 5 distinct products, which suggests they tend to stick with a limited set of financial tools.
+
+High-net-worth and affluent groups, on the other hand, show a more balanced distribution, meaning they use a wider range of products to manage their financial needs.
+
+The prospects, who are drawn from the consumer group, show a usage pattern that is similar to consumers but with a slightly wider variety of products, indicating a potential transition towards more diverse financial management."
+
+"In this slide, we look at transaction patterns across different groups.
+
+The prospects group shows transaction behaviors that are more aligned with the high-net-worth and affluent groups. Specifically, they have higher maximum transaction amounts and a greater total transaction amount over the last month compared to other consumers. This indicates that prospects might be engaging in more significant financial activities, similar to wealthier segments."
+
+
+
+
+
+
+
+
+
+
 
 import pandas as pd
 import matplotlib.pyplot as plt
