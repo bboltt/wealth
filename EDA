@@ -7,7 +7,8 @@ import pandas as pd
 df_pandas = df_with_clusters.select("scaledFeatures", "prediction").toPandas()
 
 # Extract features and labels
-X = pd.DataFrame(df_pandas["scaledFeatures"].values.tolist())
+# scaledFeatures contains a list for each row, so you need to convert it to a 2D NumPy array
+X = np.array(df_pandas["scaledFeatures"].values.tolist())  # Convert the 'scaledFeatures' column to a 2D array
 y = df_pandas['prediction']
 
 # Apply t-SNE for dimensionality reduction to 2D
@@ -23,6 +24,11 @@ plt.figure(figsize=(10, 7))
 sns.scatterplot(x='t-SNE1', y='t-SNE2', hue='cluster', palette='Set1', data=df_tsne, s=100, alpha=0.7)
 plt.title("t-SNE Cluster Visualization")
 plt.show()
+
+
+
+
+
 
 plt.figure(figsize=(10, 7))
 sns.scatterplot(x='PCA1', y='PCA2', hue='prediction', palette='Set1', data=df_pca_pd, s=200, alpha=0.5)
