@@ -61,6 +61,47 @@ plt.show()
 
 
 
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import seaborn as sns
+import pandas as pd
+import numpy as np
+
+# Assuming df_with_clusters is your DataFrame with the features and cluster labels
+df_pandas = df_with_clusters.select("scaledFeatures", "prediction").toPandas()
+
+# Extract features and labels
+X = np.array(df_pandas["scaledFeatures"].values.tolist())  # Convert the 'scaledFeatures' column to a 2D array
+y = df_pandas['prediction']
+
+# Apply t-SNE for dimensionality reduction to 3D
+tsne = TSNE(n_components=3, perplexity=30, n_iter=300)
+X_tsne = tsne.fit_transform(X)
+
+# Create a DataFrame for plotting
+df_tsne = pd.DataFrame(X_tsne, columns=['t-SNE1', 't-SNE2', 't-SNE3'])
+df_tsne['cluster'] = y
+
+# Create a 3D plot
+fig = plt.figure(figsize=(10, 7))
+ax = fig.add_subplot(111, projection='3d')
+
+# Create scatter plot
+scatter = ax.scatter(df_tsne['t-SNE1'], df_tsne['t-SNE2'], df_tsne['t-SNE3'], 
+                     c=df_tsne['cluster'], cmap='Set1', s=100, alpha=0.7)
+
+# Set labels
+ax.set_xlabel('t-SNE1')
+ax.set_ylabel('t-SNE2')
+ax.set_zlabel('t-SNE3')
+plt.title("3D t-SNE Cluster Visualization")
+
+# Add a legend
+plt.legend(*scatter.legend_elements(), title="Clusters")
+
+# Show the plot
+plt.show()
 
 
 
