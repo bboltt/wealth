@@ -1,3 +1,79 @@
+Cluster 0:
+Balance Trend: Extremely high positive balance trend of 969,500, the highest among all clusters.
+Product Holdings:
+Money Market: 53.82% ownership, which is much higher compared to other clusters.
+HELOC: Notably high proportion of households with HELOC accounts.
+Cluster 1:
+Balance Trend: Only cluster with a negative balance trend (-10,131), which is a strong differentiator.
+Product Holdings:
+Commercial Line of Credit: High presence in this cluster.
+HELOC: High ownership compared to other clusters.
+Roth IRA: Significant representation of Roth IRA accounts.
+Cluster 2:
+Recent Openings: Most active cluster in the last 30 days, with 3 new products opened.
+Balance Trend: Positive trend of 428,006.
+Product Holdings:
+Private Wealth CD: High ownership.
+Individual IRA: Prominent in this cluster.
+Cluster 3:
+Balance Trend: Moderate positive trend of 379,054, lower than Cluster 0 but still notable.
+Product Holdings:
+Trust Accounts: Significant proportion of Trust and Roth IRA accounts.
+Private Wealth CD: High representation in this cluster.
+Cluster 4:
+Balances: Lower current and ledger balances, reflecting more conservative financial profiles.
+Product Holdings:
+Trust Accounts: Strong representation of Trust products.
+Cluster 5:
+Recent Product Openings: High activity in opening credit products like Credit Cards and Loans.
+Product Holdings:
+Prime Time Checking: Higher ownership compared to other clusters.
+Cluster 6:
+Balances: Very low balances and balance trends compared to other clusters, indicating low financial activity.
+Product Holdings:
+SEP IRA and Traditional IRA: Higher ownership, showing a focus on retirement planning.
+Cluster 7:
+Balance Trend: Positive trend of 262,308, slightly above average but lower than Clusters 0 and 2.
+Product Holdings:
+Revocable Trust: High ownership of Revocable Trusts compared to other clusters.
+Private Wealth CD: Strong presence, similar to Cluster 2.
+Cluster 8:
+Balance Trend: Moderate positive balance trend of 105,297.
+Product Holdings:
+Unsecured Line: High ownership of Unsecured Line products, not seen much in other clusters.
+Cluster 9:
+Balances: Very low balance trend (9,097) and low financial activity.
+Product Holdings:
+Roth IRA and Money Market: Higher ownership in these categories, despite low overall financial activity.
+General Observations:
+Cluster 0 stands out with the highest positive balance trend and high ownership of Money Market and HELOC products.
+Cluster 1 is distinct with a negative balance trend and high ownership of Commercial Line of Credit and Roth IRA products.
+Clusters 2 and 7 show significant Private Wealth CD ownership, with Cluster 2 also being highly active in recent product openings.
+Cluster 6 is notable for its focus on retirement products like SEP IRA and Traditional IRA.
+Cluster 9 has low balance trends but stands out for ownership of Roth IRA and Money Market products.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
