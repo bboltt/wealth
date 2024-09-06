@@ -1,3 +1,85 @@
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import seaborn as sns
+import numpy as np
+import pandas as pd
+
+# Assuming df_pca_3d_pd is your DataFrame with the 3D PCA features and cluster labels
+# Calculate the global x, y, and z limits
+x_min = df_pca_3d_pd['PCA1'].min()
+x_max = df_pca_3d_pd['PCA1'].max()
+y_min = df_pca_3d_pd['PCA2'].min()
+y_max = df_pca_3d_pd['PCA2'].max()
+z_min = df_pca_3d_pd['PCA3'].min()
+z_max = df_pca_3d_pd['PCA3'].max()
+
+# Number of clusters
+num_clusters = df_pca_3d_pd['prediction'].nunique()
+
+# Create 3D subplots (adjust rows/cols for number of clusters)
+fig = plt.figure(figsize=(14, 12))
+axes = []
+
+# Create subplots for each cluster
+for i, cluster in enumerate(df_pca_3d_pd['prediction'].unique()):
+    ax = fig.add_subplot(num_clusters // 2 + num_clusters % 2, 2, i + 1, projection='3d')
+    subset = df_pca_3d_pd[df_pca_3d_pd['prediction'] == cluster]
+    
+    # Scatter plot for each cluster
+    ax.scatter(subset['PCA1'], subset['PCA2'], subset['PCA3'], s=100, alpha=0.7)
+    
+    # Set title and labels
+    ax.set_title(f'Cluster {cluster}')
+    ax.set_xlabel('PCA1')
+    ax.set_ylabel('PCA2')
+    ax.set_zlabel('PCA3')
+    
+    # Set the same limits for all axes
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
+    ax.set_zlim(z_min, z_max)
+
+    axes.append(ax)
+
+# Adjust layout
+plt.tight_layout()
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import seaborn as sns
