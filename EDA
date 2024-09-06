@@ -30,11 +30,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
+# Calculate the global x and y limits
+x_min = df_pca_pd['PCA1'].min()
+x_max = df_pca_pd['PCA1'].max()
+y_min = df_pca_pd['PCA2'].min()
+y_max = df_pca_pd['PCA2'].max()
+
 # Number of clusters
 num_clusters = df_pca_pd['prediction'].nunique()
 
 # Create subplots (rows x cols depending on the number of clusters)
-fig, axes = plt.subplots(nrows=num_clusters // 2, ncols=2, figsize=(14, 12))  # Adjust rows/cols for number of clusters
+fig, axes = plt.subplots(nrows=num_clusters // 2 + num_clusters % 2, ncols=2, figsize=(14, 12))  # Adjust rows/cols for number of clusters
 axes = axes.flatten()  # Flatten the axes array to iterate
 
 # Plot each cluster separately
@@ -43,10 +49,19 @@ for i, cluster in enumerate(df_pca_pd['prediction'].unique()):
     ax = axes[i]  # Get the corresponding axis
     sns.scatterplot(x='PCA1', y='PCA2', data=subset, s=100, alpha=0.7, ax=ax)
     ax.set_title(f'Cluster {cluster}')
+    
+    # Set the same x and y limits for each plot
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
+
+# Remove any empty subplots if the number of clusters is odd
+for j in range(i + 1, len(axes)):
+    fig.delaxes(axes[j])
 
 # Adjust layout
 plt.tight_layout()
 plt.show()
+
 
 
 
