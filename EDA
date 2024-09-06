@@ -1,638 +1,88 @@
-"In this slide, we analyze the revenue patterns across different groups.
-
-The high-net-worth, affluent, and prospects groups show similar revenue patterns, with the majority of households having lower revenues, while a few earn significantly higher amounts. In contrast, the consumer group generally has lower revenues with less variation across the group.
-
-When we look at the three-month average, the same trend continues, reinforcing that the high-net-worth, affluent, and prospects groups are similar, while consumers consistently show lower average revenues."
-
-"This slide shows how different groups use various financial products.
-
-For consumers, the most common products are checking accounts, credit cards, money markets, and regular CDs. This indicates a focus on everyday banking and savings products.
-
-In contrast, high-net-worth and affluent individuals use a broader range of products, including more specialized options like individual and irrevocable trusts. This shows their need for more complex financial management tools.
-
-Prospects, who are selected from the consumer group, show a product usage pattern that is similar to consumers but with a slight diversification, indicating they might be transitioning towards using more varied financial products."
-
-
-"In this slide, we're examining the balance patterns across different groups.
-
-On the left, the chart shows that most consumers tend to maintain lower balances, meaning they generally keep smaller amounts of money in their accounts. This is illustrated by the higher peak at the lower balance range for consumers.
-
-On the right, we see that affluent, high-net-worth, and prospects show a broader range of balances. They maintain both lower and higher balances, indicating more evenly spread financial behavior across different balance amounts.
-
-Overall, while consumers mostly operate with lower balances, the other groups demonstrate a more diverse balance range, which could suggest more complex financial needs or activities."
-
-"In this slide, we're looking at how much the balance amounts change over a month for different groups.
-
-On the left, we see that consumers generally have smaller changes in their balances from month to month, which suggests more stable financial behavior.
-
-On the right, the high-net-worth group shows larger fluctuations, indicating that their balances are more likely to change significantly over time. Affluent and prospects fall somewhere in between, with changes that are more moderate compared to the high-net-worth group but larger than those seen in consumers.
-
-This comparison helps us understand the varying financial behaviors across these groups, with consumers being the most stable, while high-net-worth individuals experience greater variability in their balances."
-
-"In this slide, we're looking at how much the balance amounts change over a month for different groups.
-
-On the left, we see that consumers generally have smaller changes in their balances from month to month, which suggests more stable financial behavior.
-
-On the right, the high-net-worth group shows larger fluctuations, indicating that their balances are more likely to change significantly over time. Affluent and prospects fall somewhere in between, with changes that are more moderate compared to the high-net-worth group but larger than those seen in consumers.
-
-This comparison helps us understand the varying financial behaviors across these groups, with consumers being the most stable, while high-net-worth individuals experience greater variability in their balances."
-
-"In this slide, we see how different groups use a variety of financial products.
-
-Consumers typically use between 1 to 5 distinct products, which suggests they tend to stick with a limited set of financial tools.
-
-High-net-worth and affluent groups, on the other hand, show a more balanced distribution, meaning they use a wider range of products to manage their financial needs.
-
-The prospects, who are drawn from the consumer group, show a usage pattern that is similar to consumers but with a slightly wider variety of products, indicating a potential transition towards more diverse financial management."
-
-"In this slide, we look at transaction patterns across different groups.
-
-The prospects group shows transaction behaviors that are more aligned with the high-net-worth and affluent groups. Specifically, they have higher maximum transaction amounts and a greater total transaction amount over the last month compared to other consumers. This indicates that prospects might be engaging in more significant financial activities, similar to wealthier segments."
-
-
-
-
-
-
-
-
-
-
-
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from datetime import datetime, timedelta
-
-# Assuming your dataframe is named df
-# df = pd.DataFrame(columns=['id', 'transaction_amt', 'transaction_date', 'group'])
-
-# Ensure transaction_date is in datetime format
-df['transaction_date'] = pd.to_datetime(df['transaction_date'])
-
-# Get the recent one month transactions
-one_month_ago = datetime.now() - timedelta(days=30)
-recent_df = df[df['transaction_date'] >= one_month_ago]
-
-# Calculate max transaction amount by id
-max_transaction_by_id = df.groupby(['id', 'group'])['transaction_amt'].max().reset_index(name='max_transaction')
-
-# Calculate recent one month total positive transaction by id
-positive_transactions = recent_df[recent_df['transaction_amt'] > 0].groupby(['id', 'group'])['transaction_amt'].sum().reset_index(name='total_positive_transactions')
-
-# Calculate recent one month total negative transaction by id
-negative_transactions = recent_df[recent_df['transaction_amt'] < 0].groupby(['id', 'group'])['transaction_amt'].sum().reset_index(name='total_negative_transactions')
-
-# Merge all data
-merged_df = max_transaction_by_id.merge(positive_transactions, on=['id', 'group'], how='left')
-merged_df = merged_df.merge(negative_transactions, on=['id', 'group'], how='left')
-merged_df.fillna(0, inplace=True)
-
-# Plotting
-plt.figure(figsize=(12, 8))
-
-# Max Transaction Plot
-plt.subplot(3, 1, 1)
-sns.boxplot(x='group', y='max_transaction', data=merged_df)
-plt.title('Max Transaction Amount by Group')
-plt.xlabel('Group')
-plt.ylabel('Max Transaction Amount')
-
-# Total Positive Transactions Plot
-plt.subplot(3, 1, 2)
-sns.boxplot(x='group', y='total_positive_transactions', data=merged_df)
-plt.title('Recent One Month Total Positive Transactions by Group')
-plt.xlabel('Group')
-plt.ylabel('Total Positive Transactions')
-
-# Total Negative Transactions Plot
-plt.subplot(3, 1, 3)
-sns.boxplot(x='group', y='total_negative_transactions', data=merged_df)
-plt.title('Recent One Month Total Negative Transactions by Group')
-plt.xlabel('Group')
-plt.ylabel('Total Negative Transactions')
-
-plt.tight_layout()
-plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Key Feature Review - Balance
-Current Balance Distribution Comparison:
-
-This plot shows that consumers have a large density in the low balance range, while affluent, prospects, and high net worth groups have more evenly distributed balances and higher presence in the mid to high balance ranges.
-
-3 Months AVG Balance Distribution Comparison:
-
-This plot highlights that consumers maintain lower average balances compared to affluent, prospects, and high net worth groups, who show similarities in their 3-month average balance distributions with higher densities at lower balances and some individuals with higher balances.
-
-
-### Key Feature Review - Balance
-
-**Balance Trend Distribution by Group:**
-
-High Net Worth group is more likely to have extreme balance trend values, indicating significant fluctuations. Consumers, Affluent, and Prospects have a more concentrated balance trend distribution with fewer extreme values compared to High Net Worth.
-
-
-Here are the condensed descriptions for each slide:
-
-### Key Feature Review - Balance
-
-**Slide 1: Current Balance Distribution**
-This plot shows that consumers have a large density in the low balance range, indicating that many consumers maintain lower balances compared to other groups. Affluent, prospects, and high-net-worth groups share similarities, with more evenly distributed balances and higher presence in the mid to high balance ranges.
-
-**Slide 2: 3-Month Average Balance Distribution**
-This plot highlights that consumers consistently have lower average balances, similar to their current balance distribution. The high-net-worth, affluent, and prospects groups display similar patterns with higher densities at lower balances and individuals with higher balances.
-
-### Key Feature Review - Balance Trend
-
-**Balance Trend Distribution by Group**
-The plots show that the high-net-worth group is more likely to have extreme values of balance trend, indicating significant fluctuations in their balances. Consumers, affluent, and prospects have more concentrated distributions with fewer extreme values compared to the high-net-worth group.
-
-### Key Feature Review - Revenue
-
-**Slide 1: Current Revenue Distribution**
-This plot shows that the high-net-worth, affluent, and prospects groups share similarities in their revenue distributions, with higher densities at lower revenues and some individuals with higher revenues. The consumer group's distribution is distinctly different, with generally lower current revenues and a steeper decline.
-
-**Slide 2: 3-Month Average Revenue Distribution**
-The high-net-worth, affluent, and prospects groups show similarities in their 3-month average revenue distributions. The consumer group's distribution differs significantly, with lower average revenues and less variation.
-
-### Key Feature Review - Product Distribution
-
-**Slide 1: Product Usage Patterns**
-This plot compares product usage patterns across different groups. Consumers primarily use checking, credit card, money market, and regular CD. High-net-worth and affluent individuals show a broader variety of product usage, including more specialized products. Prospects exhibit a distribution pattern similar to affluent and high-net-worth groups.
-
-**Slide 2: Product Diversity Distribution**
-This plot shows the distribution of product diversity for different groups. Consumers primarily use between 1 to 5 distinct products, while high-net-worth and affluent groups show a more balanced distribution across a wider range. Prospects exhibit a pattern similar to affluent and high-net-worth groups, indicating a higher diversity of products compared to consumers.
-
-**Slide 3: Account Type Count by IP_ID Level**
-The plots show that high-net-worth and affluent groups tend to have a higher number of account types compared to consumers. Consumers have a more concentrated distribution with lower account type counts. Prospects show a distribution pattern similar to affluent and high-net-worth groups, indicating higher diversity of account types compared to other consumers.
-
-
-
-
-
-
-
-
-The plots show the distribution of `balance_trend` for different groups: `consumer`, `high net worth`, `affluent`, and `prospects`. The `balance_trend` represents the slope of the balance change from this month compared to the previous month, averaged over six months.
-
-Key observations:
-1. **High Net Worth**: This group is more likely to have extreme values of `balance_trend`, indicating significant fluctuations in their balances.
-2. **Consumer, Affluent, and Prospects**: These groups have a more concentrated distribution of `balance_trend`, with fewer extreme values compared to the high net worth group.
-
-Explanation of `balance_trend`: It is the slope of the balance change from this month compared to the previous month, averaged over six months (`这个月的balance对比上个月balance，它的变化的slope，然后是用6个月的数据去做计算做的平均值`).
-
-
-
-
-
-This image shows the distribution of `state_count` across four groups: `consumer`, `high net worth`, `affluent`, and `prospects`. The `state_count` indicates the number of different states covered by a household account, i.e., how many sub-accounts under one main account include different states.
-
-Key points from the image are:
-
-1. The most frequent `state_count` for all four groups is 1.
-2. The `high net worth` and `affluent` groups occasionally exhibit higher `state_count` values, such as 12, 15, and 16.
-3. The `prospects` group's distribution is similar to that of the `consumer` group since prospects are derived from consumers; thus, they do not exhibit very high `state_count` values.
-4. If `state_count` is greater than 5, it invariably belongs to private wealth groups, either `high net worth` or `affluent`.
-
-
-
-
-# Importing necessary libraries
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, to_date, lag, max as spark_max, count, when, date_add, lit
-from pyspark.sql.window import Window
-
-# Initializing Spark session
-spark = SparkSession.builder.appName("EDA_NonPWM_to_PWM").getOrCreate()
-
-# Load data
-df = spark.read.csv("path_to_your_data.csv", header=True, inferSchema=True)
-
-# Convert date columns to date type
-df = df.withColumn("business_date", to_date(col("business_date"), "yyyy-MM-dd"))
-df = df.withColumn("open_date", to_date(col("open_date"), "yyyy-MM-dd"))
-df = df.withColumn("close_date", to_date(col("close_date"), "yyyy-MM-dd"))
-
-# Set the reference date
-reference_date = "2023-12-31"
-reference_date_col = to_date(lit(reference_date), "yyyy-MM-dd")
-
-# Define the time windows
-past_6_months_start = date_add(reference_date_col, -180)
-future_6_months_end = date_add(reference_date_col, 180)
-
-# Filter for relevant dates
-df = df.filter((col("business_date") <= future_6_months_end) & (col("business_date") >= past_6_months_start))
-
-# Determine if the consumer was non-PWM for the entire past 6 months
-windowSpec = Window.partitionBy("hh_id_in_wh").orderBy(col("business_date"))
-df = df.withColumn("prev_seg_code", lag("seg_code").over(windowSpec))
-
-# Identify consumers constantly non-PWM in the past 6 months
-non_pwm_past = df.filter((col("business_date") <= reference_date_col) & (col("business_date") >= past_6_months_start) & (col("seg_code") != "PWM")) \
-    .groupBy("hh_id_in_wh").agg(count("seg_code").alias("non_pwm_count"))
-
-# Ensure the consumer has records for the full 6 months (180 days)
-non_pwm_past = non_pwm_past.filter(col("non_pwm_count") == 180)
-
-# Identify consumers who switch to PWM in the future 6 months
-switch_to_pwm_future = df.filter((col("business_date") > reference_date_col) & (col("business_date") <= future_6_months_end) & (col("seg_code") == "PWM")) \
-    .select("hh_id_in_wh").distinct()
-
-# Valid switches are those who are non-PWM in the past 6 months and switch to PWM in the future 6 months
-valid_switches = non_pwm_past.join(switch_to_pwm_future, "hh_id_in_wh", "inner")
-
-# Extract the necessary data for analysis
-df_switch = df.join(valid_switches, "hh_id_in_wh", "inner").filter(col("business_date") > reference_date_col)
-df_switch_pd = df_switch.toPandas()
-
-# Overview of the data
-print("Data Overview:")
-print(df_switch_pd.info())
-print(df_switch_pd.describe())
-
-# Plotting distribution of account longevity
-plt.figure(figsize=(10, 6))
-sns.histplot(df_switch_pd['account_longevity'], bins=30, kde=True)
-plt.title("Distribution of Account Longevity")
-plt.xlabel("Account Longevity (days)")
-plt.ylabel("Frequency")
-plt.show()
-
-# Balance features analysis
-plt.figure(figsize=(10, 6))
-sns.boxplot(data=df_switch_pd[['curr_bal_amt', 'ledger_bal_amt']])
-plt.title("Boxplot of Current Balance and Ledger Balance Amounts")
-plt.ylabel("Balance Amount")
-plt.show()
-
-# Product diversity analysis
-plt.figure(figsize=(10, 6))
-sns.histplot(df_switch_pd['product_diversity'], bins=30, kde=True)
-plt.title("Distribution of Product Diversity")
-plt.xlabel("Number of Distinct Products Used")
-plt.ylabel("Frequency")
-plt.show()
-
-# Transaction count analysis
-plt.figure(figsize=(10, 6))
-sns.histplot(df_switch_pd['transaction_count'], bins=30, kde=True)
-plt.title("Distribution of Transaction Count")
-plt.xlabel("Transaction Count")
-plt.ylabel("Frequency")
-plt.show()
-
-# Analyzing recent activity
-plt.figure(figsize=(10, 6))
-sns.histplot(df_switch_pd['recent_activity_1m'], bins=30, kde=True)
-plt.title("Distribution of Recent Activity (Last Month)")
-plt.xlabel("Number of Transactions in Last Month")
-plt.ylabel("Frequency")
-plt.show()
-
-# Geographic features analysis
-state_count_df = df_switch_pd['state_count'].value_counts().reset_index()
-state_count_df.columns = ['state_count', 'frequency']
-plt.figure(figsize=(10, 6))
-sns.barplot(data=state_count_df, x='state_count', y='frequency')
-plt.title("Distribution of State Count")
-plt.xlabel("Number of States")
-plt.ylabel("Frequency")
-plt.show()
-
-country_count_df = df_switch_pd['country_count'].value_counts().reset_index()
-country_count_df.columns = ['country_count', 'frequency']
-plt.figure(figsize=(10, 6))
-sns.barplot(data=country_count_df, x='country_count', y='frequency')
-plt.title("Distribution of Country Count")
-plt.xlabel("Number of Countries")
-plt.ylabel("Frequency")
-plt.show()
-
-# Analyzing one-hot encoded product features
-onehot_cols = [col for col in df_switch_pd.columns if 'standardized_prd_name_' in col]
-onehot_summary = df_switch_pd[onehot_cols].sum().reset_index()
-onehot_summary.columns = ['Product', 'Count']
-onehot_summary = onehot_summary.sort_values(by='Count', ascending=False)
-
-plt.figure(figsize=(12, 8))
-sns.barplot(data=onehot_summary, x='Count', y='Product')
-plt.title("One-Hot Encoded Product Features")
-plt.xlabel("Count")
-plt.ylabel("Product")
-plt.show()
-
-# Correlation matrix
-plt.figure(figsize=(12, 8))
-correlation_matrix = df_switch_pd.corr()
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
-plt.title("Correlation Matrix")
-plt.show()
-
-# Summary of findings
-summary = {
-    "Account Longevity": df_switch_pd['account_longevity'].describe(),
-    "Current Balance Amount": df_switch_pd['curr_bal_amt'].describe(),
-    "Ledger Balance Amount": df_switch_pd['ledger_bal_amt'].describe(),
-    "Product Diversity": df_switch_pd['product_diversity'].describe(),
-    "Transaction Count": df_switch_pd['transaction_count'].describe(),
-    "Recent Activity (Last Month)": df_switch_pd['recent_activity_1m'].describe(),
-    "State Count": state_count_df,
-    "Country Count": country_count_df,
-    "Top Products Used": onehot_summary
-}
-
-for key, value in summary.items():
-    print(f"{key}:\n{value}\n")
-
-# Closing Spark session
-spark.stop()
-
-
-
-
-# Check if datediff calculation works in isolation
-sample_dates = non_pwm.select("hh_id_in_wh", "business_date").groupBy("hh_id_in_wh").agg(
-    min("business_date").alias("min_date"),
-    spark_max("business_date").alias("max_date")
-)
-
-# Debug print: Check sample date calculation
-sample_dates.show(5)
-
-# Add datediff calculation to the sample
-sample_dates = sample_dates.withColumn("non_pwm_duration", datediff(col("max_date"), col("min_date")))
-
-# Debug print: Check datediff calculation
-sample_dates.show(5)
-
-# Perform the groupBy and aggregation step-by-step
-
-# Step 1: Calculate the duration each consumer stayed non-PWM
-non_pwm_duration = non_pwm.groupBy("hh_id_in_wh").agg(
-    datediff(spark_max("business_date"), min("business_date")).alias("non_pwm_duration")
-)
-
-# Debug print: Check non-PWM duration calculation
-non_pwm_duration.show(5)
-
-# Step 2: Calculate the count of non-PWM records for each consumer
-non_pwm_count = non_pwm.groupBy("hh_id_in_wh").agg(
-    count("seg_code").alias("non_pwm_count")
-)
-
-# Debug print: Check non-PWM count calculation
-non_pwm_count.show(5)
-
-# Step 3: Get the last non-PWM date for each consumer
-last_non_pwm_date = non_pwm.groupBy("hh_id_in_wh").agg(
-    spark_max("business_date").alias("last_non_pwm_date")
-)
-
-# Debug print: Check last non-PWM date calculation
-last_non_pwm_date.show(5)
-
-# Combine the above results
-non_pwm_consistent = non_pwm_duration.join(non_pwm_count, "hh_id_in_wh").join(last_non_pwm_date, "hh_id_in_wh")
-
-# Ensure the consumer has been non-PWM for the full 6 months (180 days)
-non_pwm_consistent = non_pwm_consistent.filter((col("non_pwm_duration") >= 180) & (col("non_pwm_count") >= 180))
-
-# Debug print: Check the final non_pwm_consistent DataFrame
-non_pwm_consistent.show(5)
-
-# Identify consumers who switch to PWM after the non-PWM period
-switch_to_pwm = df.filter(col("seg_code") == "PWM").select("hh_id_in_wh", "business_date").distinct()
-
-# Debug print: Check the switch_to_pwm DataFrame
-switch_to_pwm.show(5)
-
-# Identify valid switches
-valid_switches = non_pwm_consistent.join(switch_to_pwm, "hh_id_in_wh", "inner") \
-    .filter(col("business_date") > col("last_non_pwm_date")).select("hh_id_in_wh").distinct()
-
-# Debug print: Check the valid_switches DataFrame
-valid_switches.show(5)
-
-# Extract the necessary data for analysis
-df_switch = df.join(valid_switches, "hh_id_in_wh", "inner")
-df_switch_pd = df_switch.toPandas()
-
-
-
-
-
-
-
-
-
-# Importing necessary libraries
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from pyspark.sql.functions import col
-
-# Convert Spark DataFrame to Pandas DataFrame for EDA
-df_switch_pd = df_switch.toPandas()
-
-# Overview of the data
-print("Data Overview:")
-print(df_switch_pd.info())
-print(df_switch_pd.describe())
-
-# Plotting distribution of current and ledger balance amounts
-if 'curr_bal_amt' in df_switch_pd.columns and 'ledger_bal_amt' in df_switch_pd.columns:
-    plt.figure(figsize=(10, 6))
-    sns.boxplot(data=df_switch_pd[['curr_bal_amt', 'ledger_bal_amt']])
-    plt.title("Boxplot of Current Balance and Ledger Balance Amounts")
-    plt.ylabel("Balance Amount")
-    plt.show()
-
-# Analyzing geographical distribution by state
-if 'st_code' in df_switch_pd.columns:
-    state_count_df = df_switch_pd['st_code'].value_counts().reset_index()
-    state_count_df.columns = ['st_code', 'frequency']
-    plt.figure(figsize=(10, 6))
-    sns.barplot(data=state_count_df, x='st_code', y='frequency')
-    plt.title("Distribution of State Code")
-    plt.xlabel("State Code")
-    plt.ylabel("Frequency")
-    plt.show()
-
-# Analyzing geographical distribution by country
-if 'cntry_code' in df_switch_pd.columns:
-    country_count_df = df_switch_pd['cntry_code'].value_counts().reset_index()
-    country_count_df.columns = ['cntry_code', 'frequency']
-    plt.figure(figsize=(10, 6))
-    sns.barplot(data=country_count_df, x='cntry_code', y='frequency')
-    plt.title("Distribution of Country Code")
-    plt.xlabel("Country Code")
-    plt.ylabel("Frequency")
-    plt.show()
-
-# Analyzing product code distribution
-if 'prd_code' in df_switch_pd.columns:
-    product_count_df = df_switch_pd['prd_code'].value_counts().reset_index()
-    product_count_df.columns = ['prd_code', 'frequency']
-    plt.figure(figsize=(10, 6))
-    sns.barplot(data=product_count_df, x='prd_code', y='frequency')
-    plt.title("Distribution of Product Codes")
-    plt.xlabel("Product Code")
-    plt.ylabel("Frequency")
-    plt.show()
-
-# Analyzing primary officer code distribution
-if 'prim_officer_code' in df_switch_pd.columns:
-    officer_count_df = df_switch_pd['prim_officer_code'].value_counts().reset_index()
-    officer_count_df.columns = ['prim_officer_code', 'frequency']
-    plt.figure(figsize=(10, 6))
-    sns.barplot(data=officer_count_df, x='prim_officer_code', y='frequency')
-    plt.title("Distribution of Primary Officer Codes")
-    plt.xlabel("Primary Officer Code")
-    plt.ylabel("Frequency")
-    plt.show()
-
-# Correlation matrix for numerical features
-numerical_features = ['curr_bal_amt', 'ledger_bal_amt']
-plt.figure(figsize=(12, 8))
-correlation_matrix = df_switch_pd[numerical_features].corr()
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
-plt.title("Correlation Matrix")
-plt.show()
-
-# Summary of findings
-summary = {
-    "Current Balance Amount": df_switch_pd['curr_bal_amt'].describe() if 'curr_bal_amt' in df_switch_pd.columns else "N/A",
-    "Ledger Balance Amount": df_switch_pd['ledger_bal_amt'].describe() if 'ledger_bal_amt' in df_switch_pd.columns else "N/A",
-    "State Count": state_count_df if 'st_code' in df_switch_pd.columns else "N/A",
-    "Country Count": country_count_df if 'cntry_code' in df_switch_pd.columns else "N/A",
-    "Product Code Distribution": product_count_df if 'prd_code' in df_switch_pd.columns else "N/A",
-    "Primary Officer Code Distribution": officer_count_df if 'prim_officer_code' in df_switch_pd.columns else "N/A"
-}
-
-for key, value in summary.items():
-    print(f"{key}:\n{value}\n")
-
-
-
-
-
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-# Assuming current_balance_pd is your DataFrame
-# Summing the curr_bal_amt values for each hh_id_in_wh and retaining the group information
-summed_balance_df = current_balance_pd.groupby(['hh_id_in_wh', 'group'], as_index=False)['curr_bal_amt'].sum()
-
-# Plotting the distribution of summed current balance amounts for each group separately on the same image
-plt.figure(figsize=(10, 6))
-
-groups = summed_balance_df['group'].unique()
-for group in groups:
-    sns.kdeplot(data=summed_balance_df[summed_balance_df['group'] == group], x='curr_bal_amt', label=group)
-
-plt.title("Current Balance Distribution Comparison")
-plt.xlabel("Current Balance Amount")
-plt.ylabel("Density")
-plt.legend(title='Group')
-plt.show()
-
-
-from pyspark.sql.functions import avg, date_sub
-
-# Filter data for the last three months
-max_date = combined_df.agg(max("business_date")).collect()[0][0]
-three_months_ago = date_sub(max_date, 90)
-
-last_three_months_df = combined_df.filter(col("business_date") >= three_months_ago)
-
-# Calculate the average balance for the last three months for each client
-last_three_months_avg_df = last_three_months_df.groupBy("hh_id_in_wh", "group") \
-                                               .agg(avg("curr_bal_amt").alias("avg_last_three_months_bal"))
-
-# Convert to Pandas for visualization
-last_three_months_avg_pd = last_three_months_avg_df.toPandas()
-
-plt.figure(figsize=(10, 6))
-sns.histplot(data=last_three_months_avg_pd, x="avg_last_three_months_bal", hue="group", kde=True)
-plt.title("Last Three Months Average Balance Distribution by Group")
-plt.xlabel("Average Balance Amount")
-plt.ylabel("Frequency")
-plt.show()
-
-
-
-
+def perform_clustering(spark, df, features, k):
+    """
+    Performs K-Means clustering on the PWM data and returns the cluster centers and data with cluster assignments.
+    
+    Args:
+        df (DataFrame): DataFrame containing only PWM client data.
+        features (list): List of feature names to include in the clustering.
+        k (int): Number of clusters.
+        
+    Returns:
+        centers_df (DataFrame): DataFrame containing cluster centers.
+        df_with_clusters (DataFrame): DataFrame with cluster assignments.
+    """
+    assembler = VectorAssembler(inputCols=features, outputCol="features", handleInvalid="skip")
+    scaler = StandardScaler(inputCol="features", outputCol="scaledFeatures")
+    
+    # Pipeline: Assemble features -> Normalize -> Cluster
+    kmeans = KMeans(featuresCol="scaledFeatures", k=k, seed=42)
+    pipeline = Pipeline(stages=[assembler, scaler, kmeans])
+    
+    model = pipeline.fit(df)
+    
+    # Cluster centers
+    centers = model.stages[-1].clusterCenters()
+    centers_rows = [Row(features=center.tolist()) for center in centers]
+    centers_df = spark.createDataFrame(centers_rows)
+    
+    # Data with cluster assignments
+    df_with_clusters = model.transform(df).select("hh_id_in_wh", "scaledFeatures", "prediction")
+    
+    return centers_df, df_with_clusters
+
+
+from pyspark.ml.feature import PCA
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Assuming 'product_type_pd' is the DataFrame you have after concatenation
-# Example DataFrame creation (adjust this part to your actual DataFrame)
-product_type_pd = pd.DataFrame({
-    'prd_code': [...],  # your product codes
-    'group': [...]      # your groups
-})
+# Perform clustering and get the data with cluster assignments
+centers_df, df_with_clusters = perform_clustering(spark, df, features, k=5)
 
-# Aggregating the count of product types by group
-product_count = product_type_pd.groupby(['prd_code', 'group']).size().reset_index(name='count')
+# Reduce dimensions with PCA (from Spark)
+pca = PCA(k=2, inputCol="scaledFeatures", outputCol="pcaFeatures")
+pca_model = pca.fit(df_with_clusters)
+df_pca = pca_model.transform(df_with_clusters)
 
-# Plotting the data
-plt.figure(figsize=(12, 8))
-sns.barplot(data=product_count, x='prd_code', y='count', hue='group')
-plt.title('Product Type Distribution by Group')
-plt.xlabel('Product Code')
-plt.ylabel('Count')
-plt.xticks(rotation=90)
-plt.tight_layout()
+# Convert the result to Pandas for plotting
+df_pca_pd = df_pca.select("pcaFeatures", "prediction").toPandas()
 
-# Save the plot
-plt.savefig('/mnt/data/product_type_distribution.png')
+# Create separate columns for PCA1 and PCA2
+df_pca_pd['PCA1'] = df_pca_pd['pcaFeatures'].apply(lambda x: x[0])
+df_pca_pd['PCA2'] = df_pca_pd['pcaFeatures'].apply(lambda x: x[1])
 
-# Display the plot
+# Plot the clusters
+plt.figure(figsize=(10, 7))
+sns.scatterplot(x='PCA1', y='PCA2', hue='prediction', palette='Set1', data=df_pca_pd, s=100)
+plt.title("2D Cluster Visualization (PCA Reduced)")
 plt.show()
 
 
-import seaborn as sns
-import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
-# Ensure the 'group' column is treated as a categorical variable
-filtered_balance['group'] = filtered_balance['group'].astype('category')
+# Apply PCA to reduce to 3 dimensions
+pca_3d = PCA(k=3, inputCol="scaledFeatures", outputCol="pcaFeatures")
+pca_model_3d = pca_3d.fit(df_with_clusters)
+df_pca_3d = pca_model_3d.transform(df_with_clusters)
 
-# Create a distribution plot
-plt.figure(figsize=(12, 8))
+# Convert to Pandas for 3D plotting
+df_pca_3d_pd = df_pca_3d.select("pcaFeatures", "prediction").toPandas()
+df_pca_3d_pd['PCA1'] = df_pca_3d_pd['pcaFeatures'].apply(lambda x: x[0])
+df_pca_3d_pd['PCA2'] = df_pca_3d_pd['pcaFeatures'].apply(lambda x: x[1])
+df_pca_3d_pd['PCA3'] = df_pca_3d_pd['pcaFeatures'].apply(lambda x: x[2])
 
-# Plot the distribution for each group separately
-for group in filtered_balance['group'].cat.categories:
-    sns.kdeplot(data=filtered_balance[filtered_balance['group'] == group], 
-                x='curr_bal_amt', 
-                fill=True, 
-                alpha=0.5, 
-                label=group)
+# 3D Scatter plot
+fig = plt.figure(figsize=(10, 7))
+ax = fig.add_subplot(111, projection='3d')
 
-plt.title('Distribution of curr_bal_amt by Group')
-plt.xlabel('Current Balance Amount')
-plt.ylabel('Density')
-plt.legend(title='Group')
+scatter = ax.scatter(df_pca_3d_pd['PCA1'], df_pca_3d_pd['PCA2'], df_pca_3d_pd['PCA3'], 
+                     c=df_pca_3d_pd['prediction'], cmap='Set1')
+
+ax.set_xlabel('PCA1')
+ax.set_ylabel('PCA2')
+ax.set_zlabel('PCA3')
+plt.title("3D Cluster Visualization")
+
 plt.show()
 
 
