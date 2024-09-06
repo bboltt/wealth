@@ -4,6 +4,20 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 
+
+
+
+# Apply PCA to reduce to 3 dimensions
+pca_3d = PCA(k=3, inputCol="scaledFeatures", outputCol="pcaFeatures")
+pca_model_3d = pca_3d.fit(df_with_clusters)
+df_pca_3d = pca_model_3d.transform(df_with_clusters)
+
+# Convert to Pandas for 3D plotting
+df_pca_3d_pd = df_pca_3d.select("pcaFeatures", "prediction").toPandas()
+df_pca_3d_pd['PCA1'] = df_pca_3d_pd['pcaFeatures'].apply(lambda x: x[0])
+df_pca_3d_pd['PCA2'] = df_pca_3d_pd['pcaFeatures'].apply(lambda x: x[1])
+df_pca_3d_pd['PCA3'] = df_pca_3d_pd['pcaFeatures'].apply(lambda x: x[2])
+
 # Assuming df_pca_3d_pd is your DataFrame with the 3D PCA features and cluster labels
 # Calculate the global x, y, and z limits
 x_min = df_pca_3d_pd['PCA1'].min()
