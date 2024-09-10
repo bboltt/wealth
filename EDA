@@ -1,3 +1,25 @@
+Here's a detailed description of the hyperparameter tuning process for your DeepFM model, covering the parameters you've adjusted:
+
+---
+
+In the development of our DeepFM model, we undertook a comprehensive hyperparameter tuning process to optimize model performance. Here’s an outline of the key hyperparameters adjusted:
+
+1. **Embedding Dimension (`embedding_dim`)**: This parameter controls the size of the embedding vectors for the categorical features. A larger embedding dimension can capture more detailed interactions between features but may lead to overfitting and increased computational cost.
+
+2. **Zero Ratio (`zero_ratio`)**: Given the imbalance in our dataset, where instances with label=0 (no interaction) vastly outnumber those with label=1 (interaction), `zero_ratio` specifies the desired ratio of label=0 to label=1 samples in our training set. This hyperparameter helps in balancing the data by undersampling the majority class, thus enhancing the model's ability to generalize rather than memorize the majority class.
+
+3. **Minimum Zero Count (`atleast`)**: This parameter sets a threshold for the minimum count of label=0 samples. It ensures that, regardless of the `zero_ratio`, the count of the label=0 samples is always at least equal to this threshold, providing a baseline level of representation for the majority class in the training data. This is particularly useful in scenarios where the `zero_ratio` does not provide enough majority samples due to large fluctuations in the dataset size across different training phases.
+
+4. **L2 Regularization (`l2_reg`)**: L2 regularization was applied to prevent the model from overfitting by penalizing large weights. This adds a penalty term to the loss function proportional to the sum of the squared weights, thus encouraging the model to maintain smaller weights and, consequently, a simpler model.
+
+5. **Dropout Rate (`dropout_rate`)**: To further mitigate the risk of overfitting, a dropout rate was specified. This rate determines the fraction of neurons to randomly drop out during training, forcing the model to learn more robust features that are useful in conjunction with multiple different random subsets of the other neurons.
+
+The tuning of these hyperparameters was carried out using a grid search strategy, assessing the model's performance via cross-validation on the training data. Adjustments were made iteratively to hone in on the optimal settings that maximize the validation set's performance, particularly focusing on metrics such as AUC and F1-score, which are critical for imbalanced datasets like ours.
+
+This structured approach to hyperparameter tuning has been essential in enhancing the predictive accuracy and generalizability of our DeepFM model, making it adept at handling the nuances of our imbalanced dataset.
+
+
+
 Cluster 0:
 Balance Trend: Extremely high positive balance trend of 969,500, the highest among all clusters.
 Product Holdings:
