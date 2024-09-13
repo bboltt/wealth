@@ -1,3 +1,23 @@
+So, last month I presented the first milestone to the business team, and overall, they were really happy with our progress. They said we’re doing a great job, but honestly, I was expecting a bit more feedback—maybe some suggestions on what other features we could explore or focus on. But they didn’t have much to add, just said we’re doing well, so we’ll take that as a win.
+
+Since then, I’ve been focusing on milestone 2, which has been all about visualizing the clusters and getting a clearer picture of how our models are grouping the households. That’s pretty much wrapped up now, and I’ll be presenting milestone 2 to the business team next week.
+
+We’ve also kicked off milestone 3, which will dive deeper into refining the models and preparing for the next steps, so we’ve got a lot in motion. Things are moving smoothly, and I feel we’re in a good place with both milestones.”
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Here's a detailed description of the hyperparameter tuning process for your DeepFM model, covering the parameters you've adjusted:
 
 ---
