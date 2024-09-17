@@ -1,10 +1,11 @@
-So, last month I presented the first milestone to the business team, and overall, they were really happy with our progress. They said we’re doing a great job, but honestly, I was expecting a bit more feedback—maybe some suggestions on what other features we could explore or focus on. But they didn’t have much to add, just said we’re doing well, so we’ll take that as a win.
+Definition: A valid conversion occurs when a consumer, who does not have any PWM relationship at the time the model is run, is later assigned to a PWM relationship (i.e., becomes a PWM client). Our model's performance is measured by how many of these valid conversions were correctly identified by the model.
 
-Since then, I’ve been focusing on milestone 2, which has been all about visualizing the clusters and getting a clearer picture of how our models are grouping the households. That’s pretty much wrapped up now, and I’ll be presenting milestone 2 to the business team next week.
+Example:
 
-We’ve also kicked off milestone 3, which will dive deeper into refining the models and preparing for the next steps, so we’ve got a lot in motion. Things are moving smoothly, and I feel we’re in a good place with both milestones.”
-
-
+Hank Meeks is a consumer without a PWM relationship as of September 30, 2023.
+The prospecting model runs using data up to this date and identifies Hank Meeks as a high-potential prospect.
+On April 30, 2024, Hank Meeks becomes a PWM client and is assigned to a relationship.
+This transition is considered a valid conversion, and since it was predicted by the model, it counts as a successful identification.
 
 
 
