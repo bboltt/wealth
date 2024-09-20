@@ -1,20 +1,22 @@
 
 
+“This slide shows an example of the output from the prospecting model. To give you some background, we started by clustering our existing PWM clients using a clustering model. From that process, we identified cluster centers, which represent the typical behaviors of different segments within PWM.
+
+Then, using those cluster centers, we evaluated all consumers and selected potential prospects based on their distance to the closest cluster center. The distance to the cluster center is a numeric value from 0 to 1, where a smaller number indicates that the household’s behavior closely matches that of the existing PWM clients.
+
+Let me explain the key columns here:
+
+Household: The actual consumer or household we are prospecting, such as Sanders or Dorrill.
+Distance to Cluster Center: This shows how similar the household is to the typical behaviors of the PWM clients in that cluster. A smaller distance means they are more likely to convert to a PWM client.
+Cluster Main Insights: This column shows the average behavior of all the PWM clients in that particular cluster. For example, in this affluent cluster, the typical balance is $328,854, and monthly transactions are around $2,863.
+Household Main Insights: This provides specific insights about the prospect household itself. For instance, the Sanders household has a current balance of $7,081 and opened 4 new products in the last month.
+Ideally, we would expect the cluster insights to be somewhat aligned with the prospecting household’s insights, but it’s completely normal to see some differences. The model is based on 56 features, and here, we’re only showing a few key features. So, some variation between the household and cluster averages is expected.
+
+Now, we’re looking for feedback from the business team on this. Specifically, which features do you think should be highlighted here? Would you prefer to see a range of values instead of just mean values? And are there other household behaviors you’d like us to include?”
 
 
 
 
-
-
-“This slide shows an example of the output from the prospecting model. These rows represent households that are identified as potential PWM clients, based on how similar they are to our existing PWM clusters.
-
-The distance to the cluster center gives us a numeric value, ranging from 0 to 1, that shows how close a household is to the typical behavior of the cluster. A lower number indicates stronger similarity to existing PWM clients.
-
-For each household, we present two sets of insights:
-
-Cluster Main Insights: This is the average behavior of the cluster they are closest to. For example, for this affluent household, the typical balance in the cluster is $328,854, with monthly transactions around $2,863.
-Household Main Insights: This gives specific details about the household itself. For instance, the Sanders household currently has a balance of $7,081 and opened 4 new products in the last month. Similarly, we have the Dorrill household, part of the high-net-worth group, with a balance of $227,523.
-These outputs help us understand both the household's current behavior and how it compares to our existing PWM segments. We’re looking for business feedback on whether these behaviors align with expectations and whether these households are good PWM prospects.”
 
 
 
