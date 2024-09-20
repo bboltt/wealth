@@ -1,3 +1,25 @@
+
+
+
+
+
+
+
+
+“This slide shows an example of the output from the prospecting model. These rows represent households that are identified as potential PWM clients, based on how similar they are to our existing PWM clusters.
+
+The distance to the cluster center gives us a numeric value, ranging from 0 to 1, that shows how close a household is to the typical behavior of the cluster. A lower number indicates stronger similarity to existing PWM clients.
+
+For each household, we present two sets of insights:
+
+Cluster Main Insights: This is the average behavior of the cluster they are closest to. For example, for this affluent household, the typical balance in the cluster is $328,854, with monthly transactions around $2,863.
+Household Main Insights: This gives specific details about the household itself. For instance, the Sanders household currently has a balance of $7,081 and opened 4 new products in the last month. Similarly, we have the Dorrill household, part of the high-net-worth group, with a balance of $227,523.
+These outputs help us understand both the household's current behavior and how it compares to our existing PWM segments. We’re looking for business feedback on whether these behaviors align with expectations and whether these households are good PWM prospects.”
+
+
+
+
+
 Definition: A valid conversion occurs when a consumer, who does not have any PWM relationship at the time the model is run, is later assigned to a PWM relationship (i.e., becomes a PWM client). Our model's performance is measured by how many of these valid conversions were correctly identified by the model.
 
 Example:
