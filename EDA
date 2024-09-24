@@ -1,4 +1,48 @@
+Subject: **Issue with Current Method for Calculating Deposit Balances**
 
+Dear Team,
+
+I hope this message finds you well.
+
+I've been reviewing our current method for calculating deposit balances and have identified a potential issue that may affect the accuracy of our results.
+
+**Current Methodology:**
+
+1. **Filter** the dataset where `product = 'deposit'`.
+2. **Group** the data by `user_id`.
+3. **Sum** the `balance` for each user.
+
+**Identified Issue:**
+
+The problem lies in the interpretation of the `balance` column. The `balance` represents the **total balance in the user's account at the given time**, not just the amount associated with the deposit product. This means that when we filter by `product = 'deposit'` and sum the `balance`, we're inadvertently summing the total account balances multiple times, leading to inflated figures.
+
+**Implications:**
+
+- **Inaccurate Deposit Totals:** The summed balances do not accurately reflect the actual deposit amounts held by each user.
+- **Misleading Insights:** Decisions based on this data might be flawed due to the overestimation of deposit balances.
+
+**Proposed Solution:**
+
+- **Identify the Correct Field:** Check if there's a specific field that records the balance associated solely with the deposit product.
+- **Adjust Calculations:**
+  - If such a field exists, use it to sum the deposit balances per user.
+  - If not, we may need to revise our data collection process to include this information.
+- **Data Validation:** Cross-verify the adjusted results with known benchmarks to ensure accuracy.
+
+**Next Steps:**
+
+- **Team Meeting:** I suggest we schedule a meeting to discuss this issue in detail and collaborate on the best approach to resolve it.
+- **Data Audit:** Conduct a thorough audit of the relevant fields in our dataset.
+- **Methodology Update:** Update our calculation method based on our findings.
+
+Please let me know your availability for a meeting this week. Your insights and any additional information about the dataset would be highly valuable.
+
+Thank you for your attention to this matter.
+
+Best regards,
+
+[Your Name]
+Data Science Team
 
 “This slide shows an example of the output from the prospecting model. To give you some background, we started by clustering our existing PWM clients using a clustering model. From that process, we identified cluster centers, which represent the typical behaviors of different segments within PWM.
 
