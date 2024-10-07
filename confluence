@@ -4,7 +4,24 @@
 The **Prospecting Private Wealth Management (PWM) Clients** system is a machine learning-driven approach aimed at identifying high-potential prospects for PWM services. The system employs clustering models to analyze patterns from existing PWM clients and applies these insights to identify non-PWM clients with similar profiles who are likely to convert to PWM. By incorporating data-driven decision-making, this prospecting system enhances targeting strategies, providing wealth managers with a prioritized list of prospects likely to become PWM clients.
 
 ### 1.1 Product Use, Purpose, and Scope
-The **Prospecting PWM Clients** tool is designed to assist wealth management teams in identifying potential PWM clients. It leverages clustering techniques to draw insights from existing PWM clients and applies these insights to the broader consumer base. This model helps wealth advisors focus on high-potential clients, driving revenue growth and building stronger client relationships. The system generates updates regularly, ensuring that wealth managers are equipped with timely, data-backed insights to guide outreach and client onboarding strategies.
+Here’s the detailed section 1.1 for the **Prospecting PWM Clients System**:
+
+### 1.1 Product Use, Purpose, and Scope
+
+The **Prospecting PWM Clients System** is designed as a data-driven tool for identifying potential clients who are likely to convert to Private Wealth Management (PWM) clients. The system leverages machine learning models to analyze and segment existing PWM clients and prospects based on multiple data points, creating insights for business teams and wealth advisors. 
+
+The primary purpose of this system is to streamline the prospecting process by pinpointing consumers who demonstrate similarities to existing high-net-worth or affluent PWM clients. By analyzing consumer behavior, product usage, and financial patterns, the system uncovers high-potential clients for targeted outreach, allowing wealth management teams to focus their efforts on clients most likely to convert.
+
+The **Prospecting PWM Clients System** acts as an integral part of the broader WealthClientIQ initiative, feeding insights and prioritized leads into the existing client management pipeline. Advisors can use these insights to guide conversations, better understand their client base, and make more informed decisions, ultimately leading to an increase in client conversion rates, improved client relationships, and enhanced product penetration.
+
+Key outcomes include:
+- Identification of high-potential PWM prospects using clustering analysis of existing PWM clients.
+- Data-driven insights that facilitate more effective prospecting and advisory processes.
+- Continuous updates and insights based on evolving data, improving the model over time.
+  
+The system covers all customer segments, ranging from affluent households to high-net-worth clients. It incorporates data from various sources, including customer profiles, financial transactions, and historical patterns, to provide wealth advisors with a focused list of prospects who resemble the characteristics of existing PWM clients. This approach allows for more precise targeting and ensures that outreach efforts are aligned with the actual needs and interests of potential PWM clients. 
+
+In scope, the system generates monthly updates on high-potential prospects, highlighting the most relevant targets for further engagement. This improves efficiency and productivity for the wealth advisors by reducing manual prospecting efforts and supporting data-backed decision-making in client management.
 
 ### 1.2 Actions Taken Based on the Product Output
 The tool provides wealth advisors with a ranked list of prospects, along with reason codes derived from cluster insights. These insights allow wealth managers to:
