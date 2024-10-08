@@ -73,8 +73,49 @@ Both types of features undergo standardization and encoding to prepare them for 
 
 ### 2.4 Model Methodology
 
-The system uses **K-Means clustering** to group existing PWM clients into clusters. The cluster centers are used as a reference for prospecting, with non-PWM consumers ranked by their distance to the nearest cluster center.
 
+
+### 2.3 Model Development
+
+#### 2.3.1 Methodology
+
+The Private Wealth Management (PWM) prospecting system employs a data-driven approach using clustering and similarity scoring to identify high-potential prospects for PWM services. The key steps in the methodology include feature engineering, clustering, and cosine similarity calculations.
+
+**1. Data Preprocessing and Feature Engineering:**
+The system processes transaction and demographic data from the `dm_r3.pwm_mstr_dtl_daily` and `sb_dsp.pwm_customer_segmentation_final` tables. The **FeatureEngineeringPipeline** class handles the transformation and creation of features. Key features generated include:
+
+- **Household longevity**: Number of days a household has been active.
+- **Balance statistics**: Metrics such as current balance (`curr_bal_amt`), ledger balance (`ledger_bal_amt`), and derived statistics (mean, max, min, std deviation) over different time periods.
+- **Product diversity**: Number of distinct products a household has engaged with.
+- **Geographic features**: State-level data capturing a household’s presence across states.
+- **Recent product activity**: Counts of products opened in the past 30, 90, 180, and 365 days.
+
+Each feature is normalized to ensure they have zero mean and unit variance. This enables the model to handle different scales of features efficiently and prevents any single feature from dominating the clustering process.
+
+**2. Clustering using K-Means:**
+Once features are engineered, **K-Means clustering** is applied to segment existing PWM clients. The clustering model identifies **k** distinct groups based on household behavior, product holdings, and financial activity. Each cluster represents a different segment of PWM clients, capturing a variety of characteristics such as high-balance holders, diversified product users, or geographically spread clients.
+
+The pipeline uses a vector assembler and standard scaler to combine and scale the feature set before passing it to the K-Means model. The centroids (cluster centers) produced by the K-Means algorithm represent the 'average' profile of each cluster, which is then used to calculate similarities between PWM clients and prospects.
+
+**3. Calculating Similarity Scores:**
+For prospective clients, the cosine similarity between their feature vectors and the cluster centroids is computed. This similarity score measures how closely a prospect matches the profile of each PWM cluster. Prospective clients are ranked based on their similarity to the nearest cluster.
+
+The system cross-joins prospective clients (filtered to exclude existing PWM clients) with the pre-computed cluster centroids and calculates similarity using the following formula:
+
+\[
+\text{Cosine Similarity} = \frac{A \cdot B}{||A|| \times ||B||}
+\]
+
+where \(A\) is the feature vector of a prospect and \(B\) is the centroid of a cluster. The prospect with the highest similarity score is most likely to convert into a PWM client.
+
+**4. Evaluation:**
+The performance of the model is evaluated by comparing the system’s recommendations to actual client conversion data over a defined evaluation period. Prospective clients recommended by the system are checked against a validation dataset to measure recall — the percentage of actual PWM conversions captured by the model’s top-N prospects.
+
+**Precision and recall metrics** are computed based on true positives (correctly identified prospects), false positives (incorrectly identified), and false negatives (missed PWM prospects). This evaluation ensures that the model is both identifying high-potential clients effectively and minimizing errors.
+
+---
+
+This section describes the **methodology** from preprocessing to evaluation. Let me know if you would like any adjustments before moving to the next section or if there’s anything more specific you would like me to include.
 #### Hyperparameters:
 - **Number of Clusters (K):** Determined via grid search to balance model accuracy with interpretability.
 - **Scaler:** StandardScaler is used to normalize continuous features.
