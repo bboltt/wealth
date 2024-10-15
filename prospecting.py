@@ -1,23 +1,54 @@
-from HiveIO.IO import read_hive_table
-from private_wealth_retention.consumer_prospecting.model_pipeline import calculate_similarity, perform_clustering
+from pyspark.sql.functions import broadcast, col, lit, udf, array, least, avg
 import pyspark.sql.functions as F
+from pyspark.sql.types import FloatType
+from private_wealth_retention.consumer_prospecting.feature_engineering_pipeline import normalize_features
+from private_wealth_retention.consumer_prospecting.model_pipeline import calculate_similarity, perform_clustering
 
-def get_prospects(spark, group, k, n, feature_cols):
-    # Load pre-engineered features from the Hive table
-    pwm_features = read_hive_table(spark, "SB_DSP.prospecting_pwm_features_test")
+def get_prospects(spark, pwm_df, consumer_df, k, n, feature_cols):
+    """
+    Generates prospects based on the similarity between consumer data and PWM clusters.
     
-    # Filter based on the group (affluent or high net worth)
-    pwm_features = pwm_features.filter(F.col("segmt_label") == group)
+    Args:
+        spark: Spark session.
+        pwm_df: DataFrame of PWM clients (affluent or high net worth).
+        consumer_df: DataFrame of consumer prospects.
+        k: Number of clusters.
+        n: Number of top prospects to return.
+        feature_cols: List of feature columns to use in clustering and similarity calculation.
     
-    # Perform clustering
-    cluster_centers, assembler, scaler = perform_clustering(spark, pwm_features, feature_cols, k)
+    Returns:
+        DataFrame: Prospects with similarity score, cluster statistics, and individual values.
+    """
+    # Perform clustering on PWM data
+    cluster_centers, assembler, scaler = perform_clustering(spark, pwm_df, feature_cols, k)
     
-    # Load consumers data for generating prospects
-    consumer_features = pwm_features.filter(F.col("pwm_label") == "consumer")
-    
-    # Calculate similarity between consumer features and cluster centers
-    similarity_df = calculate_similarity(spark, consumer_features, cluster_centers, assembler, scaler)
-    
-    # Return top N prospects based on similarity score
-    top_n_prospects = similarity_df.orderBy(F.col("min_similarity")).limit(n)
-    return top_n_prospects
+    # Add individual consumer feature vectors
+    consumer_df = assembler.transform(consumer_df)
+    consumer_df = scaler.transform(consumer_df)
+
+    # Calculate similarity between consumers and cluster centers
+    similarity_df = calculate_similarity(spark, consumer_df, cluster_centers, assembler, scaler)
+
+    # Calculate mean values for each cluster for specific columns
+    cluster_stats = pwm_df.groupBy("cluster_id").agg(
+        avg("curr_bal_amt").alias("cluster_avg_curr_bal_amt"),
+        avg("balance_trend").alias("cluster_avg_balance_trend"),
+        avg("product_diversity").alias("cluster_avg_product_diversity")
+    )
+
+    # Join similarity results with consumer's individual values and cluster stats
+    final_df = similarity_df \
+        .join(consumer_df.select("hh_id_in_wh", "curr_bal_amt", "balance_trend", "product_diversity"), "hh_id_in_wh", "left") \
+        .join(cluster_stats, "cluster_id", "left") \
+        .select(
+            col("hh_id_in_wh"),
+            col("min_similarity").alias("similarity_score"),
+            col("cluster_avg_curr_bal_amt"),
+            col("cluster_avg_balance_trend"),
+            col("cluster_avg_product_diversity"),
+            col("curr_bal_amt"),
+            col("balance_trend"),
+            col("product_diversity")
+        )
+
+    return final_df.orderBy(F.col("similarity_score").desc()).limit(n)
