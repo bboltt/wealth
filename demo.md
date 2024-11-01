@@ -15,20 +15,20 @@ Slide 4: Business Flow Summary
 “To summarize the business flow: We start by dividing existing PWM clients into High Net Worth and Affluent segments. Using the data gathered from these groups, we build prospecting models linked to each segment. Then, all consumers are evaluated based on these models to generate prospect lists.
 
 Slide 5: Data Source and Feature Selection/Engineering
-“To create an accurate model, data is key. Our model leverages a wide range of data sources, including Segment Data, R360 Data, and Deposit Transactions. From these sources, we engineer about 56 features that cover key aspects like demographics, behavior, balances, product distribution, revenue, and transaction details.
+“To create an accurate model, data is key. Our model utilizes various of data sources. From these sources, we engineer about 56 features that cover key aspects like demographics, behavior, balances, product distribution, revenue, and transaction.
 
 Slide 6: Key Feature Review - Balance
 “Balance is one of the core indicators of a client’s wealth potential. Here, we compare the balance distribution of prospects with that of High Net Worth and Affluent clients.
 
-As you can see, the balance distribution of our prospects aligns closely with that of the High Net Worth and Affluent groups, indicating that our prospecting model effectively identifies consumers who exhibit similar balance behaviors to these high-value clients.”
+As you can see, the balance distribution of our prospects aligns closely with that of the High Net Worth and Affluent groups, indicating that our prospecting model can identify consumers who has similar balance behaviors to these exsisting PWMs.”
 
 Slide 7: Key Feature Review - Product Distribution
-“Next, we look at product distribution, which tells us about the types of financial products consumers are engaged with. High Net Worth and Affluent clients typically hold a wider range of products, including specialized wealth products.
+“Next, we look at another example, product distribution. High Net Worth and Affluent clients typically hold a wider range of products, including specialized wealth products.
 
 Our prospecting model has identified consumers with similar diversified product usage patterns, which suggests a strong potential for wealth management. While consumers lean toward products like checking and credit cards, prospects tend to display a slight diversification, aligning them with High Net Worth or Affluent client behaviors.”
 
 Slide 8: Model Evaluation - Conversion Definition
-“Finally, let’s discuss how we evaluate our model. A valid conversion occurs when a consumer, initially without any PWM relationship, becomes a PWM client within the following six months.
+Comiong to how we evaluate our model. A valid conversion occurs when a consumer, initially without any PWM relationship, becomes a PWM client within the following six months.
 
 Our goal is to capture a high conversion rate, which reflects the model’s accuracy in identifying genuine prospects. As of our latest run, our conversion capture rates are 78% for High Net Worth prospects and 72% for Affluent prospects. This high capture rate indicates that our model is performing well in identifying high-potential clients.”
 
