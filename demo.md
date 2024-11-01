@@ -1,4 +1,4 @@
-Slide 1: Introducing Wealth Management Business Flow
+Slide 3: \
 "To begin with, we didn’t initially know which consumers might convert to Private Wealth Management (PWM) clients. However, we do have a clear picture of our existing PWM clients. Our thinking is simple: consumers who share similar behaviors or characteristics with our current PWM clients are likely good candidates for PWM services.
 
 So, our first step is to look at the existing PWM clients. Given the wealth segment data, we categorize them into High Net Worth and Affluent clients. This segmentation sets a foundation for our prospecting model."
