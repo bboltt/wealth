@@ -13,30 +13,30 @@ values = df['values'].unique()
 values_in_files = []
 values_not_in_files = list(values)
 
-# Define the file extensions to search within
-allowed_extensions = {'.py', '.yaml', '.yml'}
-
-# Step 3: Search for values within allowed files in the directory and subdirectories
+# Step 3: Search for values (as substrings) in all files except the CSV file
 for root, dirs, files in os.walk("."):
     for file_name in files:
-        # Check if the file has an allowed extension
-        if any(file_name.endswith(ext) for ext in allowed_extensions):
-            file_path = os.path.join(root, file_name)
-            try:
-                with open(file_path, 'r', encoding='utf-8') as file:
-                    content = file.read()
-                    # Check each value in the content
-                    for value in values_not_in_files[:]:  # Copy to allow modification
-                        if value in content:
-                            values_in_files.append(value)
-                            values_not_in_files.remove(value)  # Remove to avoid duplicate checks
-            except (IOError, UnicodeDecodeError):
-                # Skip files that can't be read as text
-                continue
+        # Skip the CSV file itself
+        if file_name == os.path.basename(csv_file):
+            continue
+
+        file_path = os.path.join(root, file_name)
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+                # Check each value as a substring in the file content
+                for value in values_not_in_files[:]:  # Copy to allow modification
+                    if value in content:
+                        values_in_files.append(value)
+                        values_not_in_files.remove(value)  # Remove to avoid duplicate checks
+        except (IOError, UnicodeDecodeError):
+            # Skip files that can't be read as text
+            continue
 
 # Step 4: Display the results
-print("Values found within specified files:")
+print("Values found within files:")
 print(values_in_files)
 
-print("\nValues not found within any specified files:")
+print("\nValues not found within any files:")
 print(values_not_in_files)
+
